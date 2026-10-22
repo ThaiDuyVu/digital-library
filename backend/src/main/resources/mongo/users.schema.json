@@ -1,0 +1,17 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "title": "users",
+    "required": ["username", "email", "passwordHash", "role", "createdAt"],
+    "properties": {
+      "_id": { "bsonType": "objectId" },
+      "username": { "bsonType": "string", "pattern": "^[a-z0-9_.]{3,32}$" },
+      "email": { "bsonType": "string", "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "maxLength": 254 },
+      "passwordHash": { "bsonType": "string", "minLength": 20 },
+      "fullName": { "bsonType": "string", "maxLength": 100 },
+      "role": { "enum": ["USER", "ADMIN"] },
+      "createdAt": { "bsonType": "date" },
+      "updatedAt": { "bsonType": "date" }
+    }
+  }
+}

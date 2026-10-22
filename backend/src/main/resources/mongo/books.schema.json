@@ -1,0 +1,47 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "title": "books",
+    "required": ["title", "author", "categories", "chapters", "createdAt"],
+    "properties": {
+      "_id": { "bsonType": "objectId" },
+      "title": { "bsonType": "string", "minLength": 1, "maxLength": 300 },
+      "author": { "bsonType": "string", "minLength": 1, "maxLength": 200 },
+      "categories": {
+        "bsonType": "array",
+        "maxItems": 20,
+        "uniqueItems": true,
+        "items": { "bsonType": "string", "minLength": 1, "maxLength": 100 }
+      },
+      "description": { "bsonType": "string", "maxLength": 5000 },
+      "coverUrl": { "bsonType": "string", "maxLength": 2000 },
+      "createdAt": { "bsonType": "date" },
+      "updatedAt": { "bsonType": "date" },
+      "chapters": {
+        "bsonType": "array",
+        "maxItems": 200,
+        "items": {
+          "bsonType": "object",
+          "required": ["chapterNo", "title"],
+          "properties": {
+            "chapterNo": { "bsonType": ["int", "long"], "minimum": 1 },
+            "title": { "bsonType": "string", "minLength": 1, "maxLength": 300 },
+            "content": { "bsonType": "string" },
+            "sections": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "object",
+                "required": ["sectionNo", "heading", "text"],
+                "properties": {
+                  "sectionNo": { "bsonType": ["int", "long"], "minimum": 1 },
+                  "heading": { "bsonType": "string", "maxLength": 300 },
+                  "text": { "bsonType": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

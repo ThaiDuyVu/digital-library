@@ -1,9 +1,10 @@
 spring:
   application:
     name: digital-library-api
+  # Spring Boot 4 đổi spring.data.mongodb.* thành spring.mongodb.*
+  mongodb:
+    uri: ${MONGO_URI:mongodb://admin:admin123@localhost:27017/digital_library?authSource=admin}
   data:
-    mongodb:
-      uri: ${MONGO_URI:mongodb://admin:admin123@localhost:27017/digital_library?authSource=admin}
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
 
@@ -15,3 +16,12 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  auth:
+    session-ttl: ${AUTH_SESSION_TTL:7d}
+  # Tài khoản quản trị được tạo khi khởi động nếu chưa có admin nào
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123}
+    email: ${ADMIN_EMAIL:admin@digital-library.local}
