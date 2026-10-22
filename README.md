@@ -23,7 +23,9 @@ Chi tiết: xem [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - Frontend: React + Vite
 - Hạ tầng: Docker Compose; công cụ quan sát: MongoDB Compass, Redis Insight
 
-Khung backend và frontend đã chạy được; các API và màn hình nghiệp vụ đang chờ từng thành viên triển khai. Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
+Backend đã có API sách, chương, độc giả và đăng nhập (catalog, identity); tiến trình đọc, bảng xếp hạng và giao diện đang chờ triển khai. Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
+
+Backend tự tạo tài khoản quản trị `admin` / `admin123` khi khởi động lần đầu (đổi qua `ADMIN_USERNAME`, `ADMIN_PASSWORD`).
 
 ## 4. Khởi chạy nhanh (cho cả 3 thành viên)
 ```bash
