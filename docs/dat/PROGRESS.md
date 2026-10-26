@@ -181,3 +181,31 @@ Kiểm tra trước commit: staged diff69 file trong scope, whitespace sạch; k
 Người dùng đã cho commit tài liệu,push nhánh làm việc và tạo2PR,bao gồm draftPR Đạt trước khi nền merge. Giữ nguyên commit c17086d; không merge,force-push hoặc sửa trực tiếp main/develop. Khi PR nền chưa merge,PR Đạt phải nêu đúng5 commit nền còn nằm trong diff,không dùng đoạn mô tả chỉ-phần-Đạt sau gate.
 
 Commit tài liệu chỉ gồm HANDOFF,PROGRESS,COMMIT_SCOPE_AUDIT,TWO_PR_HANDOFF. Không thêm tài liệu mới hoặc chạy test; legacy-inventory.json vẫn ngoài commit,dữ liệu alias/migration và các blocker giữ nguyên. Tài khoản connector datngo1203 có pull=true,push=false theo get_repo; endpoint collaborator-permission bị403 integration. Kiểm tra quyền Git transport và PR creation riêng,không suy diễn API read permission thành quyền push/create.
+
+## Chạy hệ thống local — 23/10/2026
+
+- Git: fetch `origin`/`fork`; `main` ở `0b1c8ce`, khớp `origin/main` (0/0), working tree ban đầu sạch. Không pull/rebase/merge/push.
+- Môi trường: Windows 11; JDK Microsoft 21.0.8 tại `C:\Program Files\Android\openjdk\jdk-21.0.8`; Maven 3.10.0 từ distribution wrapper đã có; Node 24.18.0; npm 11.16.0; Docker 29.8.1; Compose 5.5.1.
+- Tạo `.env` cục bộ từ giá trị demo trong `.env.example`; file bị Git ignore, không stage/commit. Không ghi secret thật.
+- `docker compose up -d mongodb redis`: `dl_mongodb` và `dl_redis` healthy trên cổng 27017/6379; giữ volume hiện có, không `down -v`, không FLUSH. `redisinsight` chạy trên 5540. Lần kéo `mongo-express:latest` chậm nên dừng; Mongo Express là công cụ tùy chọn, không cần cho app.
+- Maven Wrapper `.\mvnw.cmd` không khởi động được trong PowerShell hiện tại do script truy cập `(Get-Item ...).Target[0]` khi `Target` null. Dùng đúng Maven 3.10.0 mà wrapper đã tải trong `%USERPROFILE%\.m2\wrapper\dists`; không sửa wrapper/dependency hay cài toàn máy.
+- Backend khởi động bằng `mvn.cmd spring-boot:run`, PID Java 17536; log xác nhận `DigitalLibraryApiApplication` start trong 3.02 giây. `GET http://localhost:8080/api/health` trả 200 `{"status":"ok"}`.
+- Frontend: `npm.cmd ci` thêm 24 package theo lockfile; `npm.cmd run dev -- --host 127.0.0.1`, Vite 8.3.5 ready trong 391 ms tại `http://127.0.0.1:5173/`. Trang gốc trả 200; proxy `GET /api/health` qua Vite trả 200 `{"status":"ok"}`.
+- Kết luận: **Đạt** cho khởi động hạ tầng cốt lõi, backend, frontend và proxy health. Không chạy lại seed/benchmark/integration test vì code và dữ liệu liên quan không đổi. Kết quả này không gỡ các blocker UI reading/ranking, manifest Sơn, tổng duyệt hay migration legacy; `members/DAT.md` không đổi checkbox.
+
+### Khôi phục dữ liệu demo vào namespace ứng dụng
+
+- Chẩn đoán: backend kết nối `digital_library`, khi đó `books=0`; 50 sách cũ nằm trong `digital_library_dat_fixture_v1`. Redis production không có `ranking:books`, trong khi fixture có 50 member dưới `dat-fixture:v1:ranking:books`. Vì vậy API `/api/books` và `/api/ranking` trả mảng rỗng dù fixture tồn tại.
+- Tạo virtual environment cục bộ `scripts/seed/.venv` và cài dependency theo `requirements.txt`; thư mục này bị Git ignore. Không cài package toàn máy.
+- Dry-run với `PYTHONIOENCODING=utf-8`: sinh 60 sách, 469 chương, 3.23 triệu ký tự; schema OK; 10 user, 60 Hash và ZSET 50 sách; không ghi dữ liệu.
+- Chạy script chính thức không có `--reset`: `seed_books.py` upsert 60 sách ID cố định và `seed_redis.py` upsert 10 độc giả mẫu, 60 `progress:*`, 50 member `ranking:books`. Không xóa sách admin, session, key khác hay volume.
+- Xác minh qua backend: `/api/books?page=0&size=20` trả `totalElements=60`, trang đầu 20 sách; `/api/ranking?top=10` trả 10 dòng, top `b00c00000000000000000005` score 126. Proxy Vite `/api/books` cũng trả `totalElements=60`.
+- Kết luận: **Đạt** cho dữ liệu demo Mongo/Redis và API/proxy. Frontend cần refresh trang để tải danh sách mới. `ReadingPage` và `RankingPage` vẫn là placeholder theo code hiện tại; seed không được coi là đã tích hợp hai UI này.
+
+## Hoàn thiện Phase 2 và hai mục tùy chọn — 26/10/2026
+
+- Nền `0b1c8ce`, nhánh `codex/dat-phase2-completion`; giữ nguyên ghi chép 23/10 và hai trang frontend đã sửa local trước lượt này. PR vào `main` theo yêu cầu người dùng vì `develop` chậm 19 commit.
+- Đạt: thêm GET danh sách progress có xác thực, sắp xếp và bỏ sách mất; POST mở chương cần login + chapterNo, SET NX EX 60 giây và ZINCRBY cùng Lua, trùng lặp trả 200 không tăng. ReadingPage truyền chapterNo. Hợp đồng cập nhật tại SHARED; giải thích tại GIAI_THICH_PHAN_DAT.
+- Kiểm thử full suite: 44 ca, 42 qua, 0 lỗi, 2 ca review skip theo cấu hình; chạy riêng cả 2 ca review đều qua. Sau sửa lọc alias list, 18 ca progress/list qua. Redis thật: 40 request đồng thời chỉ tăng 1; owner/admin/401/403/404, alias, TTL và hết hạn đã kiểm chứng. Frontend lint exit 0 (6 warning cũ), build qua; browser save/resume trang 30, POST chapterNo và BXH qua. Lệnh chạy và giới hạn xem GIAI_THICH_PHAN_DAT.
+- Hạ tầng dùng một nhóm Compose `digital-library`. Runner dùng Redis hiện có với DB logic rỗng do người chạy chọn, tự từ chối DB có dữ liệu; không FLUSH, không tạo container. Hai Redis rời được lưu `/data` + inspect ở `output/docker-archives/20261026/` trước khi bỏ container, không xóa volume. Dữ liệu ứng dụng Mongo 60 sách, Redis progress/ranking được giữ.
+- Raw evidence, ảnh, báo cáo dài và script replay thử nghiệm lưu local tại `output/session-archive/kept-local/`, ngoài PR theo yêu cầu source gọn. Không migration alias Redis cũ, không sửa domain Vũ. Tổng duyệt nhóm, xác nhận Vũ nhận số liệu và tình huống đóng browser lúc PUT còn gửi vẫn chưa thực hiện.

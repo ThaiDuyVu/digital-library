@@ -1,5 +1,11 @@
 # Quyết định và điểm cần chốt
 
+## Quyết định 26/10/2026
+
+Người dùng chọn triển khai cả hai mục tùy chọn và thời gian chống lặp **60 giây**. GET `/api/progress/{userId}` cần Bearer/chính chủ/admin; trả các vị trí đã lưu mới nhất trước, bỏ sách đã mất. POST `/api/books/{bookId}/read?chapterNo=N` cần Bearer, chương hợp lệ; cùng user/sách/chương trong 60 giây chỉ tăng một lần, request lặp trả 200 với điểm hiện tại. Quyết định này thay D03 cũ đếm từng request; các đoạn lịch sử dưới đây giữ nguyên để đối chiếu.
+
+Shared API và ReadingPage phải truyền `chapterNo`; thay đổi này đã ghi tại `docs/SHARED.md`. Dữ liệu/key cũ không reset hoặc migration. Kiểm thử dùng một Redis Compose và DB logic rỗng, không tạo container. PR nhắm `main` theo yêu cầu người dùng vì `develop` chậm 19 commit. Xem [giải thích và kết quả](GIAI_THICH_PHAN_DAT.md).
+
 ## Đã có nguồn xác nhận
 
 | Nội dung | Căn cứ |

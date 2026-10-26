@@ -1,5 +1,11 @@
 # Fixture và phép đo độc lập của Đạt
 
+## Chạy với một nhóm Docker
+
+Dùng Compose `digital-library` với MongoDB, Redis và Redis Insight. `run-acceptance.ps1` tái sử dụng `dl_redis`; ứng dụng dùng DB0, test chọn DB logic 1..15 **đang rỗng**. Script từ chối DB có dữ liệu, không FLUSH hoặc tạo container. Ví dụ `./scripts/dat/run-acceptance.ps1 -JavaHome $jdk -RedisDatabase 7`; kiểm tra DB7 rỗng trước khi dùng. Output mặc định ở `output/acceptance/`, ngoài source Git.
+
+Phần fixture/benchmark bên dưới chạy riêng để không sửa key ứng dụng. Các đoạn mô tả container riêng trong lịch sử không còn là cách chạy acceptance hiện tại.
+
 Yêu cầu: JDK 17+, Maven wrapper, Mongo/Redis đang chạy. Tool dùng dependency backend có sẵn, không cài tool toàn máy. Chạy từ gốc repo, tuần tự, không chạy nhiều seed cùng namespace đồng thời.
 
 ```powershell

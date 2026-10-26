@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import java.time.Instant;
+import java.time.Duration;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -20,6 +21,10 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +46,7 @@ import org.bson.Document;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(DatRedisIntegrationTest.EvidenceConfiguration.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatRedisIntegrationTest {
     private static final List<Document> requests = Collections.synchronizedList(new ArrayList<>());
     private final List<Document> snapshots = new ArrayList<>();
@@ -69,12 +75,14 @@ class DatRedisIntegrationTest {
     }
 
     @AfterEach
-    void saveEvidence() throws Exception {
-        Path output = Path.of(System.getenv().getOrDefault("DAT_ACCEPTANCE_OUTPUT", "../docs/dat/evidence/acceptance"));
+    void saveEvidence(TestInfo testInfo) throws Exception {
+        Path output = Path.of(System.getenv().getOrDefault("DAT_ACCEPTANCE_OUTPUT", "../output/acceptance"));
         Files.createDirectories(output);
-        Files.writeString(output.resolve("api-redis-evidence.json"), new Document("time", Instant.now().toString())
+        String evidence = new Document("time", Instant.now().toString())
                 .append("completed", completed).append("transport", "MockMvc full Spring context; real Mongo/Redis/login")
-                .append("requests", new ArrayList<>(requests)).append("snapshots", snapshots).toJson());
+                .append("requests", new ArrayList<>(requests)).append("snapshots", snapshots).toJson();
+        Files.writeString(output.resolve("api-redis-evidence.json"), evidence);
+        Files.writeString(output.resolve(testInfo.getTestMethod().orElseThrow().getName() + "-evidence.json"), evidence);
         requests.clear();
     }
 
@@ -88,6 +96,7 @@ class DatRedisIntegrationTest {
     }
 
     @Test
+    @Order(1)
     void progressAndRankingWithRealLoginMongoAndRedis() throws Exception {
         requests.clear();
         // Dedicated, initially empty Redis DB is required: fail safely rather than clearing it.
@@ -152,11 +161,11 @@ class DatRedisIntegrationTest {
             mvc.perform(save("/api/progress/" + missing + "/" + book, admin, 1, 1, 0))
                     .andExpect(status().isNotFound());
             assertThat(redis.hasKey("progress:" + missing + ":" + book)).isFalse();
-            mvc.perform(post("/api/books/" + missing + "/read")).andExpect(status().isNotFound());
+            mvc.perform(read(missing, token, 1)).andExpect(status().isNotFound());
             assertThat(redis.opsForZSet().score("ranking:books", missing)).isNull();
         }
 
-        mvc.perform(post("/api/books/" + book + "/read")).andExpect(status().isOk())
+        mvc.perform(read(book, token, 1)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(1));
         snapshot("R01 score null to 1", key);
         int count = 40;
@@ -164,7 +173,7 @@ class DatRedisIntegrationTest {
         try {
             List<Callable<Integer>> calls = new ArrayList<>();
             for (int i = 0; i < count; i++) {
-                calls.add(() -> mvc.perform(post("/api/books/" + book + "/read")).andReturn().getResponse().getStatus());
+                calls.add(() -> mvc.perform(read(book, token, 1)).andReturn().getResponse().getStatus());
             }
             for (var result : pool.invokeAll(calls)) {
                 assertThat(result.get()).isEqualTo(200);
@@ -172,15 +181,16 @@ class DatRedisIntegrationTest {
         } finally {
             pool.shutdownNow();
         }
-        assertThat(redis.opsForZSet().score("ranking:books", book)).isEqualTo(41D);
-        snapshot("R02 40 concurrent requests all 200 score 1 to 41", key);
-        mvc.perform(post("/api/books/" + second + "/read")).andExpect(status().isOk());
+        assertThat(redis.opsForZSet().score("ranking:books", book)).isEqualTo(1D);
+        snapshot("R02 40 duplicate concurrent opens keep score 1 in the 60s window", key);
+        mvc.perform(read(book, token, 3)).andExpect(status().isOk());
+        mvc.perform(read(second, token, 1)).andExpect(status().isOk());
         mvc.perform(get("/api/ranking")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2)).andExpect(jsonPath("$[0].bookId").value(book))
-                .andExpect(jsonPath("$[0].score").value(41));
+                .andExpect(jsonPath("$[0].score").value(2));
         mvc.perform(get("/api/ranking?top=1")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
         mvc.perform(get("/api/ranking?top=100")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
-        redis.opsForZSet().add("ranking:books", second, 41);
+        redis.opsForZSet().add("ranking:books", second, 2);
         String tieFirst = book.compareTo(second) > 0 ? book : second;
         mvc.perform(get("/api/ranking")).andExpect(jsonPath("$[0].bookId").value(tieFirst));
         snapshot("R04 tie follows Redis descending member", key);
@@ -190,7 +200,7 @@ class DatRedisIntegrationTest {
         // Exercise the default limit with more than ten real books, not just a two-item list.
         for (int i = 0; i < 10; i++) {
             String extra = createBook(admin, "Dat ranking limit " + suffix + " " + i);
-            mvc.perform(post("/api/books/" + extra + "/read")).andExpect(status().isOk());
+            mvc.perform(read(extra, token, 1)).andExpect(status().isOk());
         }
         String topBody = mvc.perform(get("/api/ranking")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(10)).andReturn().getResponse().getContentAsString();
@@ -202,14 +212,21 @@ class DatRedisIntegrationTest {
         var rankingBeforeDelete = redis.opsForZSet().reverseRangeWithScores("ranking:books", 0, -1);
         mvc.perform(delete("/api/books/" + second).header("Authorization", "Bearer " + admin))
                 .andExpect(status().isNoContent());
-        mvc.perform(post("/api/books/" + second + "/read")).andExpect(status().isNotFound());
-        assertThat(redis.opsForZSet().reverseRangeWithScores("ranking:books", 0, -1)).isEqualTo(rankingBeforeDelete);
+        assertThat(redis.opsForZSet().score("ranking:books", second)).isNull();
+        assertThat(redis.hasKey("progress:" + other + ":" + second)).isFalse();
+        assertThat(redis.opsForHash().entries(key)).containsEntry("page", "31");
+        assertThat(redis.opsForZSet().reverseRangeWithScores("ranking:books", 0, -1))
+                .containsExactlyElementsOf(rankingBeforeDelete.stream()
+                        .filter(entry -> !second.equals(entry.getValue())).toList());
+        var rankingAfterDelete = redis.opsForZSet().reverseRangeWithScores("ranking:books", 0, -1);
+        mvc.perform(read(second, token, 1)).andExpect(status().isNotFound());
+        assertThat(redis.opsForZSet().reverseRangeWithScores("ranking:books", 0, -1)).isEqualTo(rankingAfterDelete);
         mvc.perform(get("/api/books/batch").param("ids", second + "," + book))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(book));
-        snapshot("R05 deleted book read rejected ZSET unchanged batch skips deleted book", key);
+        snapshot("R05 deletion removes owned book ranking/progress; rejected read leaves remaining ZSET unchanged", key);
         // IDs are evidence only. Never print tokens or passwords.
-        System.out.printf("DAT_EVIDENCE userA=%s userB=%s bookA=%s bookB=%s concurrentSuccess=%d score=41 TTL=%d%n",
+        System.out.printf("DAT_EVIDENCE userA=%s userB=%s bookA=%s bookB=%s concurrentSuccess=%d score=2 TTL=%d%n",
                 user, other, book, second, count, redis.getExpire(key));
         completed = true;
     }
@@ -232,8 +249,8 @@ class DatRedisIntegrationTest {
                 .andExpect(status().isOk());
         String restored = mvc.perform(get(canonicalPath).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        mvc.perform(post("/api/books/" + book + "/read")).andExpect(status().isOk());
-        mvc.perform(post("/api/books/" + alias + "/read")).andExpect(status().isOk())
+        mvc.perform(read(book, token, 1)).andExpect(status().isOk());
+        mvc.perform(read(alias, token, 3)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.bookId").value(book)).andExpect(jsonPath("$.score").value(2));
         String ranking = mvc.perform(get("/api/ranking")).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -306,6 +323,108 @@ class DatRedisIntegrationTest {
         snapshot("USER_ALIAS owner/admin and forbidden unchanged; legacy ranking read leaves data intact", key);
         snapshot("USER_ALIAS uppercase Hash absent", "progress:" + upperUser + ":" + upperBook);
         completed = true;
+    }
+
+    @Test
+    void progressListWithRealMongoRedisAndAuthorization() throws Exception {
+        String name = "dat_list_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String user = register(name);
+        String other = register(name + "_other");
+        String token = login(name);
+        String otherToken = login(name + "_other");
+        users.createAdmin(name + "_admin", name + "_admin@example.test", "fixture-password");
+        String admin = login(name + "_admin");
+        String first = createBook(admin, "Progress list first " + name);
+        String recent = createBook(admin, "Progress list recent " + name);
+        mvc.perform(get("/api/progress/" + user)).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/progress/" + user).header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/progress/" + user).header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(save("/api/progress/" + user + "/" + first, token, 1, 10, 0)).andExpect(status().isOk());
+        mvc.perform(save("/api/progress/" + other + "/" + first, otherToken, 1, 20, 0)).andExpect(status().isOk());
+        mvc.perform(save("/api/progress/" + user + "/" + recent, token, 3, 30, 2)).andExpect(status().isOk());
+        String orphan = "000000000000000000000000";
+        redis.opsForHash().putAll("progress:" + user + ":" + orphan, Map.of(
+                "chapter", "1", "page", "1", "line", "0", "updatedAt", Instant.now().toString()));
+        String aliasKey = "progress:" + user + ":" + recent.toUpperCase(java.util.Locale.ROOT);
+        redis.opsForHash().putAll(aliasKey, Map.of(
+                "chapter", "3", "page", "99", "line", "0", "updatedAt", Instant.now().toString()));
+        for (String accessToken : List.of(token, admin)) {
+            mvc.perform(get("/api/progress/" + user.toUpperCase(java.util.Locale.ROOT))
+                            .header("Authorization", "Bearer " + accessToken))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+                    .andExpect(jsonPath("$[0].bookId").value(recent))
+                    .andExpect(jsonPath("$[0].page").value(30)).andExpect(jsonPath("$[0].line").value(2))
+                    .andExpect(jsonPath("$[1].bookId").value(first));
+        }
+        mvc.perform(get("/api/progress/not-an-id").header("Authorization", "Bearer " + admin))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/api/progress/000000000000000000000000").header("Authorization", "Bearer " + admin))
+                .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/books/" + recent).header("Authorization", "Bearer " + admin))
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/progress/" + user).header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].bookId").value(first));
+        assertThat(redis.hasKey("progress:" + user + ":" + orphan)).isTrue();
+        assertThat(redis.opsForHash().get(aliasKey, "page")).isEqualTo("99");
+        snapshot("LIST owner/admin aliases; orphan excluded without modifying data", "progress:" + user + ":" + first);
+        completed = true;
+    }
+
+    @Test
+    void deduplicatedReadsWithRealRedisAndLogin() throws Exception {
+        String name = "dat_lock_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String user = register(name);
+        String other = register(name + "_other");
+        String token = login(name);
+        String otherToken = login(name + "_other");
+        users.createAdmin(name + "_admin", name + "_admin@example.test", "fixture-password");
+        String book = createBook(login(name + "_admin"), "Dedupe " + name);
+        mvc.perform(post("/api/books/" + book + "/read").param("chapterNo", "1"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/books/" + book + "/read").header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+        mvc.perform(read(book, token, 99)).andExpect(status().isNotFound());
+        assertThat(redis.hasKey("read-lock:" + user + ":" + book + ":99")).isFalse();
+        int count = 40;
+        var pool = Executors.newFixedThreadPool(8);
+        try {
+            List<Callable<Integer>> calls = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                calls.add(() -> mvc.perform(read(book, token, 1)).andReturn().getResponse().getStatus());
+            }
+            for (var result : pool.invokeAll(calls)) assertThat(result.get()).isEqualTo(200);
+        } finally {
+            pool.shutdownNow();
+        }
+        assertThat(redis.opsForZSet().score("ranking:books", book)).isEqualTo(1D);
+        String lock = "read-lock:" + user + ":" + book + ":1";
+        Long ttl = redis.getExpire(lock);
+        assertThat(ttl).isBetween(50L, 60L);
+        mvc.perform(read(book.toUpperCase(java.util.Locale.ROOT), token, 1)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookId").value(book)).andExpect(jsonPath("$.score").value(1));
+        assertThat(redis.getExpire(lock)).isLessThanOrEqualTo(ttl);
+        assertThat(redis.hasKey("read-lock:" + user + ":" + book.toUpperCase(java.util.Locale.ROOT) + ":1")).isFalse();
+        mvc.perform(read(book, token, 3)).andExpect(status().isOk()).andExpect(jsonPath("$.score").value(2));
+        mvc.perform(read(book, otherToken, 1)).andExpect(status().isOk()).andExpect(jsonPath("$.score").value(3));
+        assertThat(redis.hasKey("read-lock:" + other + ":" + book + ":1")).isTrue();
+        snapshot("DEDUPE 40 concurrent opens count once; alias unchanged; other chapter/user count separately", "progress:" + user + ":" + book);
+        // Shorten only this test-owned lock to exercise real Redis expiration without waiting 60 seconds.
+        redis.expire(lock, Duration.ofMillis(50));
+        long deadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+        while (redis.hasKey(lock) && System.nanoTime() < deadline) Thread.sleep(10);
+        assertThat(redis.hasKey(lock)).isFalse();
+        mvc.perform(read(book, token, 1)).andExpect(status().isOk()).andExpect(jsonPath("$.score").value(4));
+        assertThat(redis.getExpire(lock)).isBetween(50L, 60L);
+        snapshot("DEDUPE after real lock expiration a new open increments and creates a 60s lock", "progress:" + user + ":" + book);
+        completed = true;
+    }
+
+    private MockHttpServletRequestBuilder read(String bookId, String token, int chapterNo) {
+        return post("/api/books/" + bookId + "/read").param("chapterNo", Integer.toString(chapterNo))
+                .header("Authorization", "Bearer " + token);
     }
 
     private String register(String username) throws Exception {
