@@ -106,7 +106,8 @@ public class UserService {
         user.setUpdatedAt(Instant.now());
         User saved = users.save(user);
         if (passwordChanged) {
-            sessions.revokeAll(userId);
+            // Khóa phiên dùng id chuẩn của document: userId trên URL có thể là biến thể hex hoa.
+            sessions.revokeAll(saved.getId());
         }
         return UserResponse.from(saved);
     }
@@ -117,7 +118,7 @@ public class UserService {
             throw ApiException.conflict("Không thể xóa quản trị viên cuối cùng");
         }
         users.delete(user);
-        sessions.revokeAll(userId);
+        sessions.revokeAll(user.getId());
         events.publishEvent(new UserDeletedEvent(user.getId()));
     }
 

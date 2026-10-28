@@ -316,9 +316,29 @@ ZREVRANGE ranking:books 0 9 WITHSCORES
 
 Redis nhanh hơn khoảng 1,7 lần ở trung vị. Phép đo chỉ tính thời gian truy vấn CSDL (không gồm HTTP, xác thực) và chạy trên bộ dữ liệu fixture riêng. Dữ liệu gốc: [benchmark-raw.csv](dat/evidence/acceptance/benchmark/benchmark-raw.csv), [summary](dat/evidence/acceptance/benchmark/benchmark-summary.json).
 
-_Phase 2: Đạt và Sơn đo lại trên dữ liệu seed thật và bổ sung phép đo ghi (lật trang), bảng xếp hạng (`ZREVRANGE` so với `sort` trên MongoDB)._
+**Phase 2 (Sơn, 26/10/2026):** đo đủ bốn thao tác bằng `scripts/seed/bench_latency.py` trên dữ liệu seed thật. Mỗi thao tác 1000 mẫu/CSDL, warm-up 200, 50 vị trí, `concurrency=1`, hai CSDL gọi xen kẽ từng cặp để chịu cùng nhiễu. Redis 7.4.11 (AOF bật), MongoDB 7.0.45, Windows 10. Script dùng database/namespace riêng và tạo index `score` cho collection ranking để MongoDB được `sort` có index.
 
-## 6. Hiện trạng Phase 1 theo barem
+| Thao tác | Redis | MongoDB | Trung vị Redis (ms) | Trung vị Mongo (ms) | p95 Redis (ms) | p95 Mongo (ms) | Mongo/Redis |
+|---|---|---|---|---|---|---|---|
+| Đọc tiến trình | `HGETALL` | `find_one` theo `_id` | 0,802 | 1,059 | 1,273 | 1,870 | 1,32x |
+| Ghi tiến trình (lật trang) | `HSET` | `update_one` upsert | 0,831 | 1,114 | 1,210 | 1,671 | 1,34x |
+| Tăng lượt đọc | `ZINCRBY` | `update_one` `$inc` | 0,837 | 1,148 | 1,258 | 1,842 | 1,37x |
+| Lấy Top 10 | `ZREVRANGE 0 9` | `find().sort(score:-1).limit(10)` | 0,790 | 1,031 | 1,033 | 1,341 | 1,30x |
+
+Dữ liệu gốc: [bench-raw.csv](../scripts/seed/bench_out/bench-raw.csv), [bench-summary.json](../scripts/seed/bench_out/bench-summary.json).
+
+**Đọc kết quả cho đúng.** Redis nhanh hơn ở cả bốn thao tác, nhưng tỷ lệ 1,30–1,37x **thấp hơn** con số 1,7x của phép đo sơ bộ. Không nên trình bày một trong hai số như kết luận duy nhất; chênh lệch đến từ:
+
+- Hai lần đo trên hai máy và hai bộ dữ liệu khác nhau, không phải cùng một điều kiện.
+- Ở thang dưới 1 ms, phần lớn thời gian mỗi lệnh là chi phí cố định dùng chung: round-trip loopback TCP và overhead driver Python. Chi phí này cộng vào cả hai bên nên **nén tỷ lệ** lại gần 1; nó không phản ánh chênh lệch thực của hai engine.
+- `concurrency=1` nên phép đo **không** đo được lợi thế lớn nhất của Redis là chịu tải ghi đồng thời; muốn kết luận về tải thì phải đo nhiều kết nối song song.
+- `ranking_top10` trên MongoDB chỉ sắp xếp 50 bản ghi có index. Ở quy mô thật (hàng chục nghìn sách) khoảng cách sẽ giãn ra, vì `ZREVRANGE` lấy Top N từ skip list đã sắp sẵn còn MongoDB phải quét index rồi sắp xếp.
+
+Vì vậy lý do kiến trúc chọn Redis (mục 1.3) **không** dựa trên 1,3x độ trễ một lệnh, mà dựa trên: mỗi lần lật trang là một lần ghi (write amplification) nên không nên dồn tải ghi đó lên CSDL đang phục vụ nội dung; và bảng xếp hạng là cấu trúc luôn-đã-sắp-xếp cập nhật tăng dần thay vì sắp xếp lại khi đọc.
+
+Giới hạn chung của cả hai phép đo: chỉ tính thời gian truy vấn CSDL, **không** gồm HTTP, xác thực hay catalog; chạy trên localhost; không cô lập cold cache; không có SLA và không phải kiểm thử tải.
+
+## 6. Hiện trạng theo barem
 
 | Hạng mục barem | Điểm | Hiện thực | Kiểm chứng |
 |---|---|---|---|
@@ -326,13 +346,19 @@ _Phase 2: Đạt và Sơn đo lại trên dữ liệu seed thật và bổ sung 
 | Schema MongoDB + cấu trúc Redis | 1,5 | Mục 2, 3; `backend/src/main/resources/mongo/*.schema.json` áp validator và index khi khởi động | Ghi document sai schema bị MongoDB từ chối |
 | CRUD sách / chương / độc giả | 2,5 | `catalog/`, `identity/` (Vũ); hợp đồng API tại [SHARED.md](SHARED.md) mục 4 | Test `BookControllerTest`; smoke test curl: tạo/sửa/xóa sách, thêm/xóa chương, đăng ký/đăng nhập/xóa độc giả, phân quyền 401/403 |
 | Dummy data (phần MongoDB + chuẩn bị Redis) | 1,0 (một phần) | Mục 4 | 60 sách/469 chương, 60 Hash, ZSET 50 sách; chạy lại không đổi |
+| Đo hiệu năng Mongo vs Redis | – (barem mục 3) | Mục 5: bốn thao tác, 1000 mẫu/CSDL | `scripts/seed/bench_latency.py`; raw + summary trong `scripts/seed/bench_out/` |
 | Redis: kết nối, module khung | – (chuẩn bị Phase 2) | `reading/`, `ranking/` (Đạt): `GET/PUT /api/progress/...`, `POST /api/books/{id}/read`, `GET /api/ranking` | Test `ProgressApiTest`, `RankingApiTest` |
 | Giao diện quản lý sách, danh sách/đọc cơ bản | – | `frontend/src/features/catalog/`, `identity/` (Sơn) | Duyệt, tìm, lọc, đọc chương; admin thêm/sửa/xóa sách và chương; đăng ký/đăng nhập |
 
-Kết quả kiểm thử backend sau khi tích hợp và sửa lỗi Phase 1 (23/10/2026): 34 test, 0 lỗi; 4 test tích hợp Redis của Đạt bỏ qua mặc định, chỉ chạy khi đặt `DAT_INTEGRATION_TESTS=true`.
+Kết quả kiểm thử backend sau khi merge Phase 2 (28/10/2026): **54 test, 0 lỗi, 3 bỏ qua** khi chạy với Mongo/Redis thật và `DAT_INTEGRATION_TESTS=true`; 2 test review alias ID chạy riêng từng method trên Redis DB rỗng, cùng đạt. Chi tiết và giới hạn: [biên bản tích hợp Phase 2](PHASE2_INTEGRATION.md).
 
 Lỗi phát hiện khi rà soát tích hợp và đã sửa:
 - Email hợp lệ theo `@Email` nhưng thiếu dấu chấm (`a@localhost`) bị validator MongoDB từ chối, API trả 500. API nay kiểm tra cùng mẫu với `users.schema.json` và mọi lỗi vi phạm schema trả `400 BAD_REQUEST`.
 - Xóa sách/độc giả để lại `bookId`/`userId` mồ côi trong Redis, Top 10 chỉ còn 9 sách sau khi ghép. Nay dọn bằng sự kiện (mục 3.3).
 
-Phase 2 còn lại: E-Reader phân trang và tự cuộn đến trang đã lưu, gọi tăng lượt đọc khi mở chương, widget Top sách (Sơn); đo hiệu năng trên dữ liệu seed (Đạt, Sơn).
+Lỗi phát hiện khi rà soát Phase 2 (28/10/2026) và đã sửa:
+- `POST /api/books/{id}/read` thiếu `chapterNo` trả body mặc định của Spring thay vì `{code,message}`. Đây là query param bắt buộc đầu tiên của dự án nên `GlobalExceptionHandler` chưa có nhánh xử lý.
+- `CurrentUser.canAccess` so chuỗi thô nên chính chủ gọi `/api/users/{userId}` bằng ObjectId hex **hoa** bị 403, trái với invariant chuẩn hóa ID mà reading/ranking đã áp dụng. Nay chuẩn hóa trước khi so quyền.
+- Nghiêm trọng hơn: `UserService` thu hồi phiên theo `userId` thô trên URL, mà khóa Redis là `user-sessions:{id chuẩn}`. Đổi mật khẩu qua ID hex hoa **không thu hồi phiên nào** dù [SHARED.md](SHARED.md) công bố "đổi mật khẩu thu hồi mọi phiên"; token cũ vẫn dùng được. Nay thu hồi theo id chuẩn của document. Hồi quy: `CurrentUserTest`, `UserServiceTest`.
+
+Phase 2 còn lại: bằng chứng duyệt tay trên trình duyệt cho E-Reader và bảng xếp hạng (I01/I02), tổng duyệt nhóm, migration alias ID cũ.

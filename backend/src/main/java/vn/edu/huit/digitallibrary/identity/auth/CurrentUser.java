@@ -1,5 +1,7 @@
 package vn.edu.huit.digitallibrary.identity.auth;
 
+import org.bson.types.ObjectId;
+
 import vn.edu.huit.digitallibrary.identity.model.Role;
 
 /**
@@ -14,6 +16,11 @@ public record CurrentUser(String id, String username, Role role) {
 
     /** Chủ tài khoản hoặc quản trị viên mới được thao tác tài nguyên của userId. */
     public boolean canAccess(String userId) {
-        return isAdmin() || id.equals(userId);
+        return isAdmin() || id.equals(canonicalId(userId));
+    }
+
+    private static String canonicalId(String id) {
+        // Leave invalid IDs untouched so authorization and existing 404 handling keep their order.
+        return ObjectId.isValid(id) ? new ObjectId(id).toHexString() : id;
     }
 }
