@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiGet } from '../../shared/api'
+import { BookCover } from './BookCover'
 
 function ChapterReader({ bookId, chapterNo }) {
   const [chapter, setChapter] = useState(null)
@@ -50,7 +51,10 @@ export function BookDetail({ bookId, onBack }) {
 
   return (
     <section className="panel">
-      <button type="button" className="btn" onClick={onBack}>← Về kho sách</button>
+      <button type="button" className="btn" onClick={onBack}>
+        <span className="icon sm" aria-hidden="true">arrow_back</span>
+        Về kho sách
+      </button>
 
       {error && <p className="error-text" role="alert">{error}</p>}
       {!book && !error && <p className="muted">Đang tải thông tin sách…</p>}
@@ -58,17 +62,10 @@ export function BookDetail({ bookId, onBack }) {
       {book && (
         <>
           <div className="detail-head">
-            {book.coverUrl && (
-              <img
-                className="detail-cover"
-                src={book.coverUrl}
-                alt={`Bìa sách ${book.title}`}
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
-            )}
+            <BookCover book={book} className="detail-cover" />
             <div>
               <h2>{book.title}</h2>
-              <p className="book-author">Tác giả: {book.author}</p>
+              <p className="book-author">Tác giả: <strong>{book.author}</strong></p>
               <div className="chips">
                 {book.categories.map((name) => (
                   <span key={name} className="chip">{name}</span>

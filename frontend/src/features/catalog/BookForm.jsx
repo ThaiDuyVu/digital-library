@@ -1,12 +1,5 @@
-import { useState } from 'react'
-import { apiPost, apiPut } from '../../shared/api'
-
-function parseCategories(text) {
-  const unique = new Set(
-    text.split(',').map((item) => item.trim()).filter(Boolean),
-  )
-  return [...unique]
-}
+import { useEffect, useId, useState } from 'react'
+import { apiGet, apiPost, apiPut } from '../../shared/api'
 
 /**
  * initial = null  -> thêm sách mới (POST /books)
@@ -17,12 +10,50 @@ export function BookForm({ initial = null, onSaved, onCancel }) {
   const [form, setForm] = useState({
     title: initial?.title ?? '',
     author: initial?.author ?? '',
-    categories: initial?.categories?.join(', ') ?? '',
     description: initial?.description ?? '',
     coverUrl: initial?.coverUrl ?? '',
   })
+  const [categories, setCategories] = useState(initial?.categories ?? []) // thể loại đã chọn
+  const [available, setAvailable] = useState([]) // thể loại đã có trong kho sách
+  const [newCategory, setNewCategory] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const categoryLabelId = useId()
+
+  // Lấy các thể loại đã có để chọn, tránh gõ sai chính tả tạo ra thể loại trùng
+  useEffect(() => {
+    let active = true
+    apiGet('/books/categories')
+      .then((names) => { if (active) setAvailable(names) })
+      .catch(() => { if (active) setAvailable([]) })
+    return () => { active = false }
+  }, [])
+
+  // Hiển thị: thể loại có sẵn + các thể loại đã chọn nhưng chưa có trong kho (mới thêm)
+  const options = [...available, ...categories.filter((name) => !available.includes(name))]
+
+  function toggleCategory(name) {
+    setCategories((prev) => (
+      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
+    ))
+  }
+
+  function addCategory() {
+    const name = newCategory.trim()
+    if (!name) return
+    // Trùng tên (không phân biệt hoa thường) với thể loại sẵn có thì chọn lại thể loại đó
+    const existing = options.find((item) => item.toLowerCase() === name.toLowerCase())
+    const finalName = existing ?? name
+    setCategories((prev) => (prev.includes(finalName) ? prev : [...prev, finalName]))
+    setNewCategory('')
+  }
+
+  function handleCategoryKey(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault() // Enter chỉ thêm thể loại, không gửi form
+      addCategory()
+    }
+  }
 
   const update = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
@@ -40,7 +71,6 @@ export function BookForm({ initial = null, onSaved, onCancel }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    const categories = parseCategories(form.categories)
     const problem = validate(categories)
     if (problem) {
       setError(problem)
@@ -81,14 +111,45 @@ export function BookForm({ initial = null, onSaved, onCancel }) {
         <span>Tác giả *</span>
         <input value={form.author} onChange={update('author')} maxLength={200} required />
       </label>
-      <label className="field">
-        <span>Thể loại (cách nhau bằng dấu phẩy)</span>
-        <input
-          value={form.categories}
-          onChange={update('categories')}
-          placeholder="Văn học, Thiếu nhi"
-        />
-      </label>
+      <div className="field">
+        <span id={categoryLabelId}>Thể loại</span>
+        {options.length > 0 ? (
+          <div className="chip-picker" role="group" aria-labelledby={categoryLabelId}>
+            {options.map((name) => {
+              const selected = categories.includes(name)
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  className={selected ? 'chip-option selected' : 'chip-option'}
+                  aria-pressed={selected}
+                  onClick={() => toggleCategory(name)}
+                >
+                  {selected && <span className="icon sm" aria-hidden="true">check</span>}
+                  {name}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <span className="muted small">Chưa có thể loại nào, hãy thêm thể loại mới bên dưới.</span>
+        )}
+        <div className="chip-add">
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            onKeyDown={handleCategoryKey}
+            placeholder="Thêm thể loại mới…"
+            maxLength={100}
+            aria-label="Tên thể loại mới"
+          />
+          <button type="button" className="btn" onClick={addCategory} disabled={!newCategory.trim()}>
+            <span className="icon sm" aria-hidden="true">add</span>
+            Thêm
+          </button>
+        </div>
+        <span className="muted small">Đã chọn {categories.length} thể loại.</span>
+      </div>
       <label className="field">
         <span>Mô tả</span>
         <textarea value={form.description} onChange={update('description')} rows={4} maxLength={5000} />
