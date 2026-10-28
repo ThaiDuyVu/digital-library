@@ -17,7 +17,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import vn.edu.huit.digitallibrary.catalog.dto.BookContent;
+import vn.edu.huit.digitallibrary.catalog.dto.ChapterBody;
 import vn.edu.huit.digitallibrary.catalog.dto.BookDetail;
+import vn.edu.huit.digitallibrary.catalog.model.Section;
 import vn.edu.huit.digitallibrary.catalog.service.BookService;
 import vn.edu.huit.digitallibrary.common.ApiException;
 import vn.edu.huit.digitallibrary.identity.auth.CurrentUser;
@@ -92,5 +95,29 @@ class BookControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("Không tìm thấy sách missing"));
+    }
+
+    @Test
+    void contentReturnsEveryChapterBodySoReaderCanPaginateWholeBook() throws Exception {
+        given(bookService.content("b1")).willReturn(new BookContent("b1", "Sách", "Tác giả", List.of("Thiếu nhi"),
+                List.of(new ChapterBody(1, "Chương một", "Toàn văn chương một",
+                                List.of(new Section(1, "Mục A", "Nội dung mục A"))),
+                        new ChapterBody(2, "Chương hai", "Toàn văn chương hai", List.of()))));
+
+        mockMvc.perform(get("/api/books/b1/content"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.chapters.length()").value(2))
+                .andExpect(jsonPath("$.chapters[0].content").value("Toàn văn chương một"))
+                .andExpect(jsonPath("$.chapters[0].sections[0].text").value("Nội dung mục A"))
+                .andExpect(jsonPath("$.chapters[1].content").value("Toàn văn chương hai"));
+    }
+
+    @Test
+    void contentOfMissingBookReturns404() throws Exception {
+        given(bookService.content("missing")).willThrow(ApiException.notFound("Không tìm thấy sách"));
+
+        mockMvc.perform(get("/api/books/missing/content"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
 }

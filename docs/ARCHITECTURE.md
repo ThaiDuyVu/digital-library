@@ -226,6 +226,7 @@ Ví dụ document `books`:
 | Danh sách có phân trang, lọc | `find({categories: c}).sort({createdAt: -1}).skip(p*s).limit(s)` + projection loại `chapters.content`, `chapters.sections`, `chapters.title` |
 | Tìm kiếm | `find({$text: {$search: q}}).sort({score: {$meta: "textScore"}})` |
 | Đọc một chương | `findOne({_id}, {title: 1, chapters: {$elemMatch: {chapterNo: n}}})` |
+| Đọc toàn văn cả cuốn | `findOne({_id})` không projection – E-Reader cần đủ mọi chương để đánh số trang liên tục trên toàn sách (`GET /api/books/{bookId}/content`) |
 | Thêm chương | `updateOne({_id, "chapters.chapterNo": {$ne: n}}, {$push: {chapters: {$each: [c], $sort: {chapterNo: 1}}}})` – điều kiện `$ne` chống trùng số chương, `$sort` giữ mảng theo thứ tự |
 | Sửa chương | `updateOne({_id, "chapters.chapterNo": n}, {$set: {"chapters.$": c}})` |
 | Xóa chương | `updateOne({_id, "chapters.chapterNo": n}, {$pull: {chapters: {chapterNo: n}}})` |
@@ -350,7 +351,7 @@ Giới hạn chung của cả hai phép đo: chỉ tính thời gian truy vấn 
 | Redis: kết nối, module khung | – (chuẩn bị Phase 2) | `reading/`, `ranking/` (Đạt): `GET/PUT /api/progress/...`, `POST /api/books/{id}/read`, `GET /api/ranking` | Test `ProgressApiTest`, `RankingApiTest` |
 | Giao diện quản lý sách, danh sách/đọc cơ bản | – | `frontend/src/features/catalog/`, `identity/` (Sơn) | Duyệt, tìm, lọc, đọc chương; admin thêm/sửa/xóa sách và chương; đăng ký/đăng nhập |
 
-Kết quả kiểm thử backend sau khi merge Phase 2 (28/10/2026): **54 test, 0 lỗi, 3 bỏ qua** khi chạy với Mongo/Redis thật và `DAT_INTEGRATION_TESTS=true`; 2 test review alias ID chạy riêng từng method trên Redis DB rỗng, cùng đạt. Chi tiết và giới hạn: [biên bản tích hợp Phase 2](PHASE2_INTEGRATION.md).
+Kết quả kiểm thử backend (28/10/2026): **56 test, 0 lỗi** trên Mongo/Redis thật; 5 test tích hợp Redis cần `DAT_INTEGRATION_TESTS=true` và 2 test review alias ID phải chạy riêng từng method trên một Redis DB rỗng — đã chạy và cùng đạt. Chi tiết và giới hạn: [biên bản tích hợp Phase 2](PHASE2_INTEGRATION.md).
 
 Lỗi phát hiện khi rà soát tích hợp và đã sửa:
 - Email hợp lệ theo `@Email` nhưng thiếu dấu chấm (`a@localhost`) bị validator MongoDB từ chối, API trả 500. API nay kiểm tra cùng mẫu với `users.schema.json` và mọi lỗi vi phạm schema trả `400 BAD_REQUEST`.
@@ -361,6 +362,8 @@ Lỗi phát hiện khi rà soát Phase 2 (28/10/2026) và đã sửa:
 - `CurrentUser.canAccess` so chuỗi thô nên chính chủ gọi `/api/users/{userId}` bằng ObjectId hex **hoa** bị 403, trái với invariant chuẩn hóa ID mà reading/ranking đã áp dụng. Nay chuẩn hóa trước khi so quyền.
 - Nghiêm trọng hơn: `UserService` thu hồi phiên theo `userId` thô trên URL, mà khóa Redis là `user-sessions:{id chuẩn}`. Đổi mật khẩu qua ID hex hoa **không thu hồi phiên nào** dù [SHARED.md](SHARED.md) công bố "đổi mật khẩu thu hồi mọi phiên"; token cũ vẫn dùng được. Nay thu hồi theo id chuẩn của document. Hồi quy: `CurrentUserTest`, `UserServiceTest`.
 
-I01 và I02 đã được duyệt trên Chrome thật đối với mã đang nằm trên `main`, kể cả ca đóng tab lúc `PUT` đang gửi mà trước đây còn để ngỏ: xem [docs/vu/UI_EVIDENCE.md](vu/UI_EVIDENCE.md). Lượt duyệt đó phát hiện thêm một lỗi chưa sửa — 78% bản ghi tiến trình đang trỏ tới số trang vượt quá số trang có thật của chương, khiến giao diện báo "trang 30" nhưng hiển thị trang cuối; chi tiết và hướng xử lý ở cùng tài liệu, phần thuộc Sơn.
+I01 và I02 đã được duyệt trên Chrome thật đối với mã đang nằm trên `main`, kể cả ca đóng tab lúc `PUT` đang gửi mà trước đây còn để ngỏ: xem [docs/vu/UI_EVIDENCE.md](vu/UI_EVIDENCE.md).
 
-Phase 2 còn lại: sửa dữ liệu/giao diện cho lỗi số trang nói trên, tổng duyệt nhóm, migration alias ID cũ.
+Mốc **"Trang 30"** mà kịch bản demo của đề tài yêu cầu cũng đã đạt sau khi chuyển E-Reader sang đánh số trang liên tục trên cả cuốn sách; trước đó đánh số trong từng chương nên trần là 7 trang. Vị trí **dòng** cũng được lưu và khôi phục đúng, hoàn thiện yêu cầu "lưu vị trí trang/dòng" của barem mục 3.
+
+Phase 2 còn lại: nạp lại dữ liệu tiến trình mẫu theo cách chia trang mới, tổng duyệt nhóm, migration alias ID cũ.

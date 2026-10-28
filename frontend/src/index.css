@@ -309,6 +309,11 @@ select, .toolbar select, .select {
 .reader-controls .select { flex: 1 1 220px; width: auto; }
 .reader-search { display: flex; flex: 1 1 220px; gap: 8px; }
 .reader-search .input-icon { flex: 1; }
+/* Ô nhảy nhanh tới một trang bất kỳ của cuốn sách */
+.reader-jump { flex: 0 0 120px; width: 120px; }
+.reader-jump input { width: 100%; padding: 10px 12px 10px 40px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font: inherit; color: inherit; }
+.reader-jump input:focus { outline: none; border-color: var(--primary); }
+
 .size-group { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .size-group button { border: 0; background: transparent; padding: 8px 12px; font-size: .8125rem; font-weight: 600; color: var(--ink-soft); }
 .size-group button + button { border-left: 1px solid var(--border); }

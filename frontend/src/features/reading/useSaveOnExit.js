@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { getToken } from '../../shared/api'
 
-const keyOf = (pos) => `${pos.chapterNo}:${pos.page}`
+// Trang được đánh số trên cả cuốn nên chỉ cần page+line là xác định được vị trí; chapter suy ra từ page.
+const keyOf = (pos) => `${pos.page}:${pos.line}`
 
 /**
  * Lưu vị trí đọc khi người dùng đóng tab / chuyển tab / tải lại trang.
@@ -9,13 +10,15 @@ const keyOf = (pos) => `${pos.chapterNo}:${pos.page}`
  * - Không dùng navigator.sendBeacon vì nó chỉ gửi POST và không gắn được header Authorization.
  * - Chỉ gửi khi vị trí khác với lần đã lưu thành công, tránh ghi Redis thừa.
  */
-export function useSaveOnExit({ userId, bookId, pos }) {
+export function useSaveOnExit({ userId, bookId, pos, chapterNo }) {
   const latest = useRef(null)    // vị trí mới nhất
-  const savedKey = useRef(null)  // "chapterNo:page" đã được lưu xong
+  const savedKey = useRef(null)  // "page:line" đã được lưu xong
 
   useEffect(() => {
-    latest.current = userId && bookId && pos ? { userId, bookId, pos } : null
-  }, [userId, bookId, pos])
+    latest.current = userId && bookId && pos && chapterNo != null
+      ? { userId, bookId, chapterNo, pos }
+      : null
+  }, [userId, bookId, pos, chapterNo])
 
   // Đổi sách thì coi như chưa lưu gì
   useEffect(() => {
@@ -23,8 +26,8 @@ export function useSaveOnExit({ userId, bookId, pos }) {
   }, [bookId])
 
   // ReadingPage gọi khi PUT thành công hoặc khi vừa khôi phục vị trí từ Redis
-  const markSaved = useCallback((chapterNo, page) => {
-    savedKey.current = `${chapterNo}:${page}`
+  const markSaved = useCallback((page, line) => {
+    savedKey.current = `${page}:${line}`
   }, [])
 
   useEffect(() => {
@@ -44,9 +47,9 @@ export function useSaveOnExit({ userId, bookId, pos }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          chapter: current.pos.chapterNo,
+          chapter: current.chapterNo,
           page: current.pos.page,
-          line: 0,
+          line: current.pos.line,
         }),
       }).catch(() => {
         savedKey.current = null // gửi lỗi thì lần sau thử lại

@@ -18,14 +18,14 @@
 ## Phase 2 (barem mục 3 & 4)
 ### C. Giao diện E-Reader
 - [x] Màn hình đọc có phân trang, nút chuyển chương/trang
-- [ ] Khi mở sách: gọi API tiến trình → **tự cuộn đến đúng trang đã lưu**
+- [x] Khi mở sách: gọi API tiến trình → **tự cuộn đến đúng trang đã lưu**
 - [x] Tự động lưu tiến trình khi chuyển trang; khi đóng tab dùng cơ chế gửi phù hợp để tránh mất request
 - [x] Mỗi lần mở chương → gọi API tăng lượt đọc
 - [x] Widget **Top sách thịnh hành** (cập nhật định kỳ)
 
 > Cập nhật 28/10/2026 (lượt duyệt trên Chrome thật, [bằng chứng](../docs/vu/UI_EVIDENCE.md)): bốn mục đã đánh `[x]` có ảnh và nhật ký HTTP kèm theo — lật trang/chuyển chương chạy đúng, đóng tab giữa lúc `PUT` đang gửi vẫn lưu được nhờ `fetch(keepalive)`, mỗi lần mở chương gửi đúng một `POST /read` (200), widget Top hiển thị và tự cập nhật.
 >
-> Mục "tự cuộn đến đúng trang đã lưu" **giữ `[ ]`**: với vị trí hợp lệ thì khôi phục đúng (chương 2 trang 8), nhưng 47/60 bản ghi tiến trình trong Redis DB0 ghi số trang vượt số trang có thật, và khi đó giao diện báo "Tiếp tục … trang 30" trong khi hiển thị "Trang 8 / 8" rồi không bao giờ sửa lại. Cần chỉnh seed và/hoặc cho `ReadingPage` tự kéo về trang hợp lệ rồi `PUT` lại; sau đó mới đủ bằng chứng để đánh `[x]`.
+> Mục "tự cuộn đến đúng trang đã lưu" **đã đạt** sau lượt sửa 28/10/2026: `ReadingPage` đánh số trang liên tục trên cả cuốn (trung bình 45 trang/sách) nên mốc "Trang 30" của đề tài tới được, lưu thêm vị trí dòng và tự kéo vị trí quá hạn về trang hợp lệ rồi ghi lại. Đã duyệt trên Chrome thật: mở lại đúng Trang 30, cuộn về đúng dòng (lệch 4px trên dòng cao 32px).
 >
 > Trạng thái trước đó: code của cả 5 mục trên đã merge vào `main` qua PR #8 (`ReadingPage`, `useSaveOnExit`, `TopBooksWidget`, tự cập nhật 10 giây). API tương ứng đã kiểm chứng đầu-cuối trên Mongo/Redis thật, [biên bản](../docs/PHASE2_INTEGRATION.md). Vẫn để `[ ]` vì các mục này là hành vi trên trình duyệt (tự mở đúng trang, gửi request khi đóng tab) mà chưa có bằng chứng duyệt tay — build và curl không thay cho một lượt chạy thật.
 

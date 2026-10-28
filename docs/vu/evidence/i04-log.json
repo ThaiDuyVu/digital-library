@@ -1,0 +1,42 @@
+[
+  {
+    "n": "Xoa tien trinh cu trong sandbox DB4",
+    "d": "progress:6ae191eff962b6d06886e14e:b00c00000000000000000029"
+  },
+  {
+    "n": "Redis sau khi lat nhanh + nhay trang",
+    "d": "page 30 updatedAt 2026-10-28T06:41:04.127632Z chapter 5 line 0"
+  },
+  {
+    "n": "(1) PUT song song khong con ghi de",
+    "d": "DAT (page=30)"
+  },
+  {
+    "n": "So khoi van ban cua trang 30",
+    "d": "3 -> cuon toi khoi thu 3"
+  },
+  {
+    "n": "Trang thai luu tren UI",
+    "d": "cloud_doneĐã lưu trang 30, dòng 1 vào Redis."
+  },
+  {
+    "n": "Redis sau khi dong tab",
+    "d": "page 30 updatedAt 2026-10-28T06:41:04.127632Z chapter 5 line 0"
+  },
+  {
+    "n": "Ghi duoc \"dong\" khac 0?",
+    "d": "KHONG DAT (line=0)"
+  },
+  {
+    "n": "Thong bao khoi phuc",
+    "d": "check_circleTiếp tục từ trang 30."
+  },
+  {
+    "n": "Vi tri sau khi mo lai",
+    "d": "Chương 5: Trước khi chiếc máy dịch thời gian biến mấtTrang 30 / 68"
+  },
+  {
+    "n": "(2) Dong da luu co nam trong man hinh khong",
+    "d": "top=626px -> DAT"
+  }
+]

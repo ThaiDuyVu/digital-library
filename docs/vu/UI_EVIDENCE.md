@@ -55,9 +55,62 @@ Chống tăng lặp 60 giây cũng được kiểm ngay trên giao diện: mở 
 
 **Kết luận I02: Đạt.**
 
-## 4. Lỗi phát hiện trong lượt duyệt: trang đã lưu vượt số trang có thật
+## 4. Mốc "Trang 30" của đề tài (lượt sửa 28/10/2026)
 
-Đây là phát hiện mới, **chưa sửa**, vì nằm trong phần của Sơn (`frontend/src/features/reading/`, `scripts/seed/`).
+[Yêu cầu đề tài](../YC_PJ.md) ghi rõ: *"SV1 đọc sách đến Trang 30 trên Web rồi đóng trình duyệt. SV3 mở lại sách → Hệ thống tự động cuộn đến đúng Trang 30"*. Mốc này là điều kiện chấm 1,5đ "Demo sống", không phải chi tiết tùy chọn.
+
+### Vì sao trước đó không đạt
+
+E-Reader đánh số trang **trong từng chương**, 1.600 ký tự một trang. Chương dài nhất trong cả kho là 10.699 ký tự, tức trần 7 trang — Trang 30 nằm ngoài tầm với của mọi chương. Dữ liệu seed lại ghi số trang tới 40, hoàn toàn ngẫu nhiên và không bám nội dung thật (kiểm 40 bản ghi: chỉ 3 khớp mô hình "cả cuốn", 7 khớp mô hình "từng chương"). Hệ quả: 47/60 bản ghi tiến trình trong Redis DB0 trỏ tới trang không tồn tại; giao diện báo *"Tiếp tục từ chương 2, trang 30"* trong khi hiển thị *"Trang 8 / 8"* ([ảnh 07](evidence/07-kich-ban-trang-30.png)) và không bao giờ tự sửa.
+
+### Đã sửa thế nào
+
+1. **`GET /api/books/{bookId}/content`** (mới, catalog): trả toàn văn cả cuốn trong một lần gọi. `GET /api/books/{bookId}` cố ý cắt toàn văn nên client không thể tự tính tổng số trang.
+2. **Đánh số trang liên tục trên cả cuốn**: mỗi chương vẫn bắt đầu ở trang mới, nhưng số trang chạy suốt sách. Trung bình 45 trang/sách, nhiều nhất 68 — Trang 30 luôn tới được. Thêm ô "nhảy tới trang" để không phải lật tay 30 lần.
+3. **Tự chữa vị trí quá hạn**: nếu trang đã lưu vượt số trang hiện có, giao diện kéo về trang cuối, nói đúng sự thật và `PUT` lại để Redis thôi giữ số sai.
+4. **Seed sinh vị trí từ chính thuật toán chia trang**: `scripts/seed/seed_redis.py` nay port `splitLong`/`paginateChapter` của `ReadingPage.jsx` sang Python, nên `(chapter, page, line)` luôn trỏ vị trí có thật.
+
+### Kết quả duyệt
+
+| Bước | Kết quả | Ảnh |
+|---|---|---|
+| Mở sách | `Chương 1 … Trang 1 / 68` | [11](evidence/11-mo-sach-phan-trang-ca-cuon.png) |
+| Đọc tới trang 30 | `Chương 5 … Trang 30 / 68` | [12](evidence/12-trang-30-truoc-khi-dong.png) |
+| Đóng tab rồi mở lại | `Tiếp tục từ trang 30.` + `Chương 5 … Trang 30 / 68` | [13](evidence/13-mo-lai-dung-trang-30.png) |
+
+### Hai lỗi lộ ra trong lúc duyệt, đã sửa luôn
+
+**Ghi đè vị trí do `PUT` chạy song song.** Lật trang nhanh sinh nhiều `PUT /api/progress` cùng lúc và chúng không về đích theo thứ tự gửi, nên vị trí cũ ghi đè vị trí mới: giao diện báo "Đã lưu trang 30" trong khi Redis vẫn giữ `page 2`. Nay mỗi lúc chỉ cho một `PUT` chạy, vị trí tới trong lúc đang gửi thì xếp hàng và chỉ giữ cái mới nhất. Sau khi sửa: lật nhanh 5 trang rồi nhảy tới 30 → Redis đúng `page 30` ([log](evidence/i04-log.json)).
+
+**Khôi phục dòng 0 vẫn cuộn xuống 497px**, đẩy tiêu đề sách ra khỏi màn hình. Nay dòng đầu trang thì giữ nguyên đầu trang.
+
+## 5. Yêu cầu "lưu vị trí trang/dòng"
+
+Barem mục 3 đòi *"Lưu vị trí trang/dòng đọc dở"*. Trước đây giao diện gửi cứng `line: 0` ở cả hai chỗ, nên phần "dòng" chỉ có trong schema chứ không có thật.
+
+Thoạt đầu tôi tính "dòng" theo chỉ số đoạn văn, nhưng phép đo cho thấy cách đó vô dụng: ở khung 1013px, trang chỉ cao 1510px nên đoạn đầu luôn còn trong màn hình và chỉ số luôn bằng 0. Nay "dòng" là **số dòng văn bản đã trôi qua mép trên vùng đọc**, quy đổi theo `line-height` đang hiển thị — đúng nghĩa "dòng" và luôn đo được.
+
+Duyệt trên khung 1280×600 (laptop nhỏ, trang cao 1510px, mỗi dòng 32px):
+
+```
+cuộn xuống cuối trang  -> Redis: page 30  chapter 5  line 14
+mở lại                 -> "Tiếp tục từ trang 30, dòng 15."
+                          cần 448px từ đầu vùng văn bản, thực tế 444px — lệch 4px (< 1 dòng)
+```
+
+Ảnh [16](evidence/16-dong-khac-0.png) và [17](evidence/17-khoi-phuc-dung-dong.png). Trên màn hình lớn mà cả trang lọt trong khung thì `line` bằng 0 — đó là đúng, không có dòng nào trôi qua.
+
+## 6. Chạy lại I02 trên E-Reader mới
+
+Đổi cách chia trang có thể làm hỏng việc đếm lượt đọc, nên I02 được chạy lại: mở lần lượt chương 2→10, 10 request `POST /read` đều 200, sách leo từ hạng 4 lên hạng 1 (`▲ 3 hạng`), ba sách còn lại lùi một hạng. Ảnh [18](evidence/18-bxh-truoc.png), [19](evidence/19-bxh-sau.png).
+
+## 7. Kiểm thử backend sau lượt sửa
+
+**56 test, 0 lỗi.** Hai test review alias ID phải chạy riêng từng method trên một Redis DB rỗng (bản thân test báo *"Use a fresh dedicated Redis instance"*), đã chạy tách và cùng đạt. Mỗi lượt dùng một database Mongo mới và Redis DB rỗng; không `FLUSHDB`, không xóa volume.
+
+## 8. Phụ lục: lỗi đã nêu ở lượt duyệt đầu
+
+> Giữ lại làm lịch sử. Lỗi này **đã sửa** ở mục 4; phần bên dưới là nguyên văn lúc mới phát hiện.
 
 Giao diện chia trang ở phía client, 1.600 ký tự một trang (`PAGE_CHARS` trong `ReadingPage.jsx`). Chương dài nhất trong toàn bộ kho là 10.699 ký tự, tức **tối đa 7 trang**. Nhưng dữ liệu seed đang có số trang tới 40: **47 trên 60 bản ghi tiến trình trong Redis DB0 (78%) trỏ tới một trang không thể tồn tại.**
 
@@ -65,9 +118,4 @@ Hậu quả quan sát được trên trình duyệt ([07](evidence/07-kich-ban-t
 
 Ảnh hưởng trực tiếp tới kịch bản demo: `docs/DEMO_SCRIPT.md` và tiêu chí I01 đều viết "đọc đến trang 30", mà người đọc không bao giờ tới được trang 30 với dữ liệu và cách phân trang hiện tại. Nếu demo mở một tài khoản seed, màn hình sẽ tự mâu thuẫn trước mặt hội đồng.
 
-Hai hướng xử lý, cần Sơn quyết vì thuộc phần của Sơn:
-
-1. **Sửa seed** để số trang nằm trong khoảng hợp lệ của chương tương ứng — gốc rễ của vấn đề.
-2. **Cho `ReadingPage` tự chữa**: khi `pos.page > totalPages`, kéo về trang cuối, đổi lời thông báo cho đúng và `PUT` lại tiến trình để Redis thôi giữ số sai.
-
-Nên làm cả hai: (1) dọn dữ liệu đang có, (2) giúp giao diện không nói sai khi gặp chương bị sửa ngắn lại về sau.
+Cả hai hướng xử lý nêu lúc đó đều đã thực hiện ở mục 4: sửa seed để vị trí bám nội dung thật, và cho `ReadingPage` tự kéo vị trí quá hạn về trang hợp lệ rồi ghi lại. Riêng dữ liệu đang có trong Redis DB0 thì **chưa nạp lại** — cần chạy `python seed_redis.py --reset`, là thao tác ghi đè dữ liệu nên chờ người dùng duyệt.

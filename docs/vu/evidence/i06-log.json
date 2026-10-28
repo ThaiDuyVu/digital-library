@@ -1,0 +1,30 @@
+[
+  {
+    "n": "Moc dau ZSET sandbox",
+    "d": "6ad9aafea64520f313150512 9 b00c00000000000000000001 7 b00c00000000000000000002 5 b00c00000000000000000029 1"
+  },
+  {
+    "n": "BXH truoc",
+    "d": "[{\"hang\":1,\"ten\":\"Dế Mèn phiêu lưu ký\",\"diem\":\"9\",\"xuhuong\":\"—\"},{\"hang\":2,\"ten\":\"Câu chuyện về tấm bản đồ sao thất lạc\",\"diem\":\"7\",\"xuhuong\":\"—\"},{\"hang\":3,\"ten\":\"Dấu chân quanh căn biệt thự bỏ hoang\",\"diem\":\"5\",\"xuhuong\":\"—\"},{\"hang\":4,\"ten\":\"Hành trình đi tìm tương lai của loài người\",\"diem\":\"1\",\"xuhuong\":\"—\"}]"
+  },
+  {
+    "n": "POST /read tu trinh duyet",
+    "d": "10 request, status 200"
+  },
+  {
+    "n": "ZSET sau khi doc",
+    "d": "b00c00000000000000000029 10 6ad9aafea64520f313150512 9 b00c00000000000000000001 7 b00c00000000000000000002 5"
+  },
+  {
+    "n": "BXH sau",
+    "d": "[{\"hang\":1,\"ten\":\"Hành trình đi tìm tương lai của loài người\",\"diem\":\"10\",\"xuhuong\":\"▲ 3 hạng\"},{\"hang\":2,\"ten\":\"Dế Mèn phiêu lưu ký\",\"diem\":\"9\",\"xuhuong\":\"▼ 1 hạng\"},{\"hang\":3,\"ten\":\"Câu chuyện về tấm bản đồ sao thất lạc\",\"diem\":\"7\",\"xuhuong\":\"▼ 1 hạng\"},{\"hang\":4,\"ten\":\"Dấu chân quanh căn biệt thự bỏ hoang\",\"diem\":\"5\",\"xuhuong\":\"▼ 1 hạng\"}]"
+  },
+  {
+    "n": "Thu hang",
+    "d": "truoc=4 sau=1"
+  },
+  {
+    "n": "I02 tren reader moi",
+    "d": "DAT"
+  }
+]

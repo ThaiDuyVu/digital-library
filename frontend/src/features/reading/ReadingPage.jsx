@@ -1,16 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ApiError, apiGet, apiPost, apiPut } from '../../shared/api'
 import { useAuth } from '../../shared/auth-context'
 import { useSaveOnExit } from './useSaveOnExit'
 import { TopBooksWidget } from '../ranking/TopBooksWidget'
 
-// Số ký tự tối đa mỗi trang. Backend chưa giới hạn page nên phân trang hoàn toàn ở client.
+// Số ký tự tối đa mỗi trang. Backend không giới hạn page vì cách chia trang thuộc frontend.
 const PAGE_CHARS = 1600
 
 // Cỡ chữ vùng đọc (px) – chỉ ảnh hưởng hiển thị, không đổi cách chia trang
 const MIN_FONT = 15
 const MAX_FONT = 24
 const DEFAULT_FONT = 18
+
+// Chừa chỗ cho thanh điều hướng dính trên khi tính dòng đang đọc
+const STICKY_OFFSET = 160
 
 /** Cắt đoạn quá dài thành nhiều đoạn, ưu tiên cắt ở cuối câu, sau đó ở khoảng trắng. */
 function splitLong(text, limit) {
@@ -28,7 +31,7 @@ function splitLong(text, limit) {
 }
 
 /** Chia một chương (content + sections) thành các trang; mỗi trang là mảng khối {kind, text}. */
-function paginate(chapter) {
+function paginateChapter(chapter) {
   const blocks = []
   const pushText = (text) => {
     for (const part of String(text ?? '').split(/\n+/)) {
@@ -63,6 +66,23 @@ function paginate(chapter) {
   return pages.length > 0 ? pages : [[]]
 }
 
+/**
+ * Đánh số trang liên tục trên TOÀN CUỐN sách, không phải trong từng chương.
+ *
+ * Kịch bản demo yêu cầu đọc tới "Trang 30"; chương dài nhất trong kho chỉ khoảng 7 trang nên
+ * đánh số theo chương thì không bao giờ tới được mốc đó. Tính cả cuốn thì trung bình mỗi sách
+ * có khoảng 37 trang. Mỗi chương vẫn bắt đầu ở một trang mới.
+ */
+function paginateBook(chapters) {
+  const pages = []
+  for (const chapter of chapters) {
+    for (const blocks of paginateChapter(chapter)) {
+      pages.push({ chapterNo: chapter.chapterNo, chapterTitle: chapter.title, blocks })
+    }
+  }
+  return pages
+}
+
 export function ReadingPage() {
   const { user, loading: authLoading } = useAuth()
   const userId = user?.id
@@ -75,19 +95,33 @@ export function ReadingPage() {
   // Sách đang đọc và vị trí
   const [bookId, setBookId] = useState('')
   const [book, setBook] = useState(null)
-  const [pos, setPos] = useState(null) // { chapterNo, page }
+  const [pos, setPos] = useState(null) // { page, line } – page tính trên cả cuốn
   const [resumeNote, setResumeNote] = useState('')
   const [bookError, setBookError] = useState('')
-  const [chapter, setChapter] = useState(null)
-  const [chapterError, setChapterError] = useState('')
   const [saveState, setSaveState] = useState('') // '' | 'saving' | 'saved' | 'error'
   const [fontSize, setFontSize] = useState(DEFAULT_FONT)
 
-  const countedRef = useRef(null) // "bookId:chapterNo" đã gọi /read, tránh tăng lặp khi render lại
-  const saveSeq = useRef(0)
+  const countedRef = useRef(null)   // "bookId:chapterNo" đã gọi /read, tránh tăng lặp khi render lại
+  const inFlight = useRef(false)    // đang có một PUT tiến trình chạy
+  const pendingSave = useRef(null)  // vị trí mới nhất còn chờ gửi
   const articleRef = useRef(null)
+  const textRef = useRef(null)      // vùng văn bản, dùng để quy đổi vị trí cuộn ra số dòng
+  const pendingLine = useRef(null)  // dòng cần cuộn tới sau khi khôi phục vị trí
 
-  const { markSaved } = useSaveOnExit({ userId, bookId, pos })
+  /** Chiều cao một dòng văn bản đang hiển thị, để quy đổi giữa pixel và số dòng. */
+  const lineHeight = useCallback(() => {
+    const article = textRef.current
+    const measured = article ? parseFloat(getComputedStyle(article).lineHeight) : NaN
+    return Number.isFinite(measured) && measured > 0 ? measured : fontSize * 1.6
+  }, [fontSize])
+
+  const pages = useMemo(() => (book ? paginateBook(book.chapters) : null), [book])
+  const totalPages = pages?.length ?? 0
+  const page = pos && totalPages > 0 ? Math.min(Math.max(pos.page, 1), totalPages) : 1
+  const currentPage = pages?.[page - 1] ?? null
+  const chapterNo = currentPage?.chapterNo ?? null
+
+  const { markSaved } = useSaveOnExit({ userId, bookId, pos, chapterNo })
 
   // 1. Tải danh sách sách (tối đa 100 theo giới hạn của API), tìm kiếm theo từ khóa
   const [search, setSearch] = useState('')
@@ -102,87 +136,147 @@ export function ReadingPage() {
     return () => { active = false }
   }, [userId, search])
 
-  // 2. Chọn sách: tải mục lục và tiến trình đã lưu (GET progress, 404 = chưa đọc bao giờ)
+  // 2. Chọn sách: tải TOÀN VĂN cả cuốn (cần để đánh số trang liên tục) và tiến trình đã lưu
   useEffect(() => {
     countedRef.current = null
+    pendingLine.current = null
     setBook(null)
-    setChapter(null)
     setPos(null)
     setResumeNote('')
     setBookError('')
-    setChapterError('')
     setSaveState('')
     if (!bookId || !userId) return undefined
 
     let active = true
     Promise.all([
-      apiGet(`/books/${bookId}`),
+      apiGet(`/books/${bookId}/content`),
       apiGet(`/progress/${userId}/${bookId}`).catch((err) => {
         if (err instanceof ApiError && err.status === 404) return null
         throw err
       }),
     ])
-      .then(([detail, saved]) => {
+      .then(([content, saved]) => {
         if (!active) return
-        setBook(detail)
-        const first = detail.chapters[0]?.chapterNo
-        if (first == null) {
-          setBookError('Sách này chưa có chương nào.')
+        const total = paginateBook(content.chapters).length
+        if (total === 0) {
+          setBook(content)
+          setBookError('Sách này chưa có nội dung để đọc.')
           return
         }
-        // Chương đã lưu có thể đã bị xóa: khi đó mở lại từ đầu
-        const canResume = saved && detail.chapters.some((c) => c.chapterNo === saved.chapter)
-        const start = canResume
-          ? { chapterNo: saved.chapter, page: saved.page }
-          : { chapterNo: first, page: 1 }
-        setPos(start)
-        markSaved(start.chapterNo, start.page) // vị trí vừa mở chưa đổi, không cần lưu lại khi thoát
-        if (canResume) setResumeNote(`Tiếp tục từ chương ${saved.chapter}, trang ${saved.page}.`)
+        setBook(content)
+
+        if (!saved) {
+          setPos({ page: 1, line: 0 })
+          markSaved(1, 0)
+          return
+        }
+        // Trang đã lưu có thể vượt số trang hiện có nếu sách bị sửa ngắn lại: kéo về trang cuối.
+        const wanted = Number(saved.page) || 1
+        const start = Math.min(Math.max(wanted, 1), total)
+        const line = Math.max(Number(saved.line) || 0, 0)
+        setPos({ page: start, line })
+        pendingLine.current = line
+        if (start === wanted) {
+          markSaved(start, line)
+          setResumeNote(`Tiếp tục từ trang ${start}${line > 0 ? `, dòng ${line + 1}` : ''}.`)
+        } else {
+          // Ghi lại ngay để Redis thôi giữ số trang không còn tồn tại
+          setResumeNote(`Vị trí đã lưu (trang ${wanted}) không còn trong sách này; mở lại ở trang ${start}.`)
+        }
       })
       .catch((err) => { if (active) setBookError(err.message) })
     return () => { active = false }
   }, [bookId, userId, markSaved])
 
-  // 3. Mở chương: tải nội dung và tăng lượt đọc đúng một lần cho mỗi lần mở chương
-  const chapterNo = pos?.chapterNo
-  useEffect(() => {
-    setChapter(null)
-    setChapterError('')
-    if (!bookId || chapterNo == null) return undefined
+  /**
+   * Lưu vị trí lên Redis. Dùng chung cho lật trang, đổi chương và tự chữa vị trí quá hạn.
+   *
+   * Chỉ cho một PUT chạy mỗi lúc: lật trang nhanh sinh nhiều request song song và chúng không
+   * về đích theo thứ tự gửi, nên vị trí cũ có thể ghi đè vị trí mới trong Redis. Vị trí nào tới
+   * trong lúc đang gửi thì xếp hàng, chỉ giữ cái mới nhất.
+   */
+  const save = useCallback(async (nextPage, nextLine, nextChapterNo) => {
+    if (!userId || !bookId || nextChapterNo == null) return
+    pendingSave.current = { chapter: nextChapterNo, page: nextPage, line: nextLine }
+    if (inFlight.current) return
+    inFlight.current = true
+    setSaveState('saving')
+    try {
+      while (pendingSave.current) {
+        const body = pendingSave.current
+        pendingSave.current = null
+        await apiPut(`/progress/${userId}/${bookId}`, body)
+        markSaved(body.page, body.line)
+      }
+      setSaveState('saved')
+    } catch {
+      pendingSave.current = null
+      setSaveState('error')
+    } finally {
+      inFlight.current = false
+    }
+  }, [userId, bookId, markSaved])
 
-    let active = true
-    apiGet(`/books/${bookId}/chapters/${chapterNo}`)
-      .then((data) => {
-        if (!active) return
-        setChapter(data)
-        const key = `${bookId}:${chapterNo}`
-        if (countedRef.current !== key) {
-          countedRef.current = key
-          apiPost(`/books/${bookId}/read?chapterNo=${chapterNo}`).catch(() => {}) // lỗi đếm lượt không chặn việc đọc
-        }
-      })
-      .catch((err) => { if (active) setChapterError(err.message) })
-    return () => { active = false }
+  // 3. Vị trí đã lưu vượt số trang có thật: ghi lại vị trí đã kéo về để lần sau mở đúng
+  useEffect(() => {
+    if (!pos || !chapterNo || totalPages === 0) return
+    if (pos.page >= 1 && pos.page <= totalPages) return
+    save(page, pos.line, chapterNo)
+    setPos({ page, line: pos.line })
+  }, [pos, page, chapterNo, totalPages, save])
+
+  // 4. Mở chương mới: tăng lượt đọc đúng một lần cho mỗi lần mở chương
+  useEffect(() => {
+    if (!bookId || chapterNo == null) return
+    const key = `${bookId}:${chapterNo}`
+    if (countedRef.current === key) return
+    countedRef.current = key
+    apiPost(`/books/${bookId}/read?chapterNo=${chapterNo}`).catch(() => {}) // lỗi đếm lượt không chặn việc đọc
   }, [bookId, chapterNo])
 
-  const pages = useMemo(() => (chapter ? paginate(chapter) : null), [chapter])
-  const totalPages = pages?.length ?? 1
-  const page = pos ? Math.min(Math.max(pos.page, 1), totalPages) : 1
+  // 5. Sau khi trang đã render, cuộn tới đúng dòng đã lưu (một lần cho mỗi lần khôi phục)
+  useEffect(() => {
+    if (pendingLine.current == null || !currentPage) return
+    const line = pendingLine.current
+    pendingLine.current = null
+    if (line <= 0) return // dòng đầu trang thì giữ nguyên đầu trang
+    // Đợi trình duyệt dựng xong layout mới đo được vị trí dòng
+    const frame = requestAnimationFrame(() => {
+      const article = textRef.current
+      if (!article) return
+      window.scrollTo({ top: window.scrollY + article.getBoundingClientRect().top + line * lineHeight() - STICKY_OFFSET })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [currentPage, lineHeight])
 
-  // 4. Lật trang hoặc đổi chương: cập nhật vị trí và lưu lên Redis (PUT progress)
-  function go(nextChapter, nextPage) {
-    setPos({ chapterNo: nextChapter, page: nextPage })
+  // 6. Theo dõi dòng đang đọc: số dòng văn bản đã trôi qua mép trên vùng đọc
+  useEffect(() => {
+    if (!currentPage) return undefined
+    function onScroll() {
+      const article = textRef.current
+      if (!article) return
+      const passed = STICKY_OFFSET - article.getBoundingClientRect().top
+      const line = Math.max(0, Math.round(passed / lineHeight()))
+      setPos((prev) => (prev && prev.line !== line ? { ...prev, line } : prev))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [currentPage, lineHeight])
+
+  /** Chuyển tới một trang bất kỳ của cuốn sách và lưu vị trí. */
+  function go(nextPage) {
+    if (!pages || nextPage < 1 || nextPage > totalPages) return
+    pendingLine.current = null
+    setPos({ page: nextPage, line: 0 })
     setResumeNote('')
     articleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    save(nextPage, 0, pages[nextPage - 1].chapterNo)
+  }
 
-    const seq = ++saveSeq.current
-    setSaveState('saving')
-    apiPut(`/progress/${userId}/${bookId}`, { chapter: nextChapter, page: nextPage, line: 0 })
-      .then(() => {
-        markSaved(nextChapter, nextPage)
-        if (seq === saveSeq.current) setSaveState('saved')
-      })
-      .catch(() => { if (seq === saveSeq.current) setSaveState('error') })
+  /** Trang đầu tiên của một chương trong cách đánh số liên tục. */
+  function firstPageOf(targetChapterNo) {
+    const index = pages?.findIndex((p) => p.chapterNo === targetChapterNo) ?? -1
+    return index < 0 ? null : index + 1
   }
 
   function handleSearch(event) {
@@ -245,12 +339,15 @@ export function ReadingPage() {
               </select>
             </form>
 
-            {book && pos && (
+            {book && pos && chapterNo != null && (
               <div className="reader-controls" style={{ marginTop: 10 }}>
                 <select
                   className="select"
-                  value={pos.chapterNo}
-                  onChange={(e) => go(Number(e.target.value), 1)}
+                  value={chapterNo}
+                  onChange={(e) => {
+                    const target = firstPageOf(Number(e.target.value))
+                    if (target) go(target)
+                  }}
                   aria-label="Chọn chương"
                 >
                   {chapters.map((c) => (
@@ -259,6 +356,17 @@ export function ReadingPage() {
                     </option>
                   ))}
                 </select>
+                <label className="input-icon reader-jump">
+                  <span className="icon" aria-hidden="true">input</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={totalPages}
+                    value={page}
+                    onChange={(e) => go(Number(e.target.value))}
+                    aria-label="Nhảy tới trang"
+                  />
+                </label>
                 <div className="size-group" role="group" aria-label="Cỡ chữ">
                   <button
                     type="button"
@@ -302,7 +410,7 @@ export function ReadingPage() {
             )}
             {bookId && !book && !bookError && <p className="muted">Đang tải sách…</p>}
 
-            {book && pos && (
+            {book && currentPage && (
               <>
                 <div className="reader-head">
                   {book.categories[0] && <span className="tag">{book.categories[0]}</span>}
@@ -313,80 +421,73 @@ export function ReadingPage() {
                   </p>
                 </div>
 
-                {chapterError && <p className="error-text" role="alert">{chapterError}</p>}
-                {!chapter && !chapterError && <p className="muted">Đang tải chương…</p>}
+                <div className="reader-chapter-banner">
+                  <span>Chương {currentPage.chapterNo}: {currentPage.chapterTitle}</span>
+                  <span>Trang {page} / {totalPages}</span>
+                </div>
 
-                {chapter && pages && (
-                  <>
-                    <div className="reader-chapter-banner">
-                      <span>Chương {chapter.chapterNo}: {chapter.title}</span>
-                      <span>Trang {page} / {totalPages}</span>
-                    </div>
+                <article ref={textRef} className="reader-text" style={{ '--reader-size': `${fontSize}px` }}>
+                  {currentPage.blocks.map((block, index) => (
+                    block.kind === 'h'
+                      ? <h4 key={index}>{block.text}</h4>
+                      : <p key={index}>{block.text}</p>
+                  ))}
+                </article>
 
-                    <article className="reader-text" style={{ '--reader-size': `${fontSize}px` }}>
-                      {pages[page - 1].map((block, index) => (
-                        block.kind === 'h'
-                          ? <h4 key={index}>{block.text}</h4>
-                          : <p key={index}>{block.text}</p>
-                      ))}
-                    </article>
+                <div className="reader-foot">
+                  <div className="reader-pager">
+                    <button
+                      type="button"
+                      className="btn"
+                      disabled={page <= 1}
+                      onClick={() => go(page - 1)}
+                    >
+                      <span className="icon sm" aria-hidden="true">arrow_back</span>
+                      Trang trước
+                    </button>
+                    <span className="page-indicator">
+                      <span className="icon sm" aria-hidden="true">auto_stories</span>
+                      Trang {page} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn"
+                      disabled={page >= totalPages}
+                      onClick={() => go(page + 1)}
+                    >
+                      Trang sau
+                      <span className="icon sm" aria-hidden="true">arrow_forward</span>
+                    </button>
+                  </div>
 
-                    <div className="reader-foot">
-                      <div className="reader-pager">
-                        <button
-                          type="button"
-                          className="btn"
-                          disabled={page <= 1}
-                          onClick={() => go(pos.chapterNo, page - 1)}
-                        >
-                          <span className="icon sm" aria-hidden="true">arrow_back</span>
-                          Trang trước
-                        </button>
-                        <span className="page-indicator">
-                          <span className="icon sm" aria-hidden="true">auto_stories</span>
-                          Trang {page} / {totalPages}
-                        </span>
-                        <button
-                          type="button"
-                          className="btn"
-                          disabled={page >= totalPages}
-                          onClick={() => go(pos.chapterNo, page + 1)}
-                        >
-                          Trang sau
-                          <span className="icon sm" aria-hidden="true">arrow_forward</span>
-                        </button>
-                      </div>
-
-                      <div className="chapter-jump">
-                        <button
-                          type="button"
-                          className="btn ghost small-btn"
-                          disabled={!prevChapter}
-                          onClick={() => go(prevChapter.chapterNo, 1)}
-                        >
-                          <span className="icon sm" aria-hidden="true">chevron_left</span>
-                          Chương trước
-                        </button>
-                        <button
-                          type="button"
-                          className={page >= totalPages && nextChapter ? 'btn primary small-btn' : 'btn ghost small-btn'}
-                          disabled={!nextChapter}
-                          onClick={() => go(nextChapter.chapterNo, 1)}
-                        >
-                          Chương sau
-                          <span className="icon sm" aria-hidden="true">chevron_right</span>
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
+                  <div className="chapter-jump">
+                    <button
+                      type="button"
+                      className="btn ghost small-btn"
+                      disabled={!prevChapter}
+                      onClick={() => go(firstPageOf(prevChapter.chapterNo))}
+                    >
+                      <span className="icon sm" aria-hidden="true">chevron_left</span>
+                      Chương trước
+                    </button>
+                    <button
+                      type="button"
+                      className={nextChapter ? 'btn primary small-btn' : 'btn ghost small-btn'}
+                      disabled={!nextChapter}
+                      onClick={() => go(firstPageOf(nextChapter.chapterNo))}
+                    >
+                      Chương sau
+                      <span className="icon sm" aria-hidden="true">chevron_right</span>
+                    </button>
+                  </div>
+                </div>
 
                 <p className={saveState === 'error' ? 'save-status error' : 'save-status'} role="status">
                   {saveState === 'saving' && 'Đang lưu vị trí đọc…'}
                   {saveState === 'saved' && (
                     <>
                       <span className="icon sm" aria-hidden="true">cloud_done</span>
-                      Đã lưu vị trí đọc vào Redis.
+                      Đã lưu trang {page}, dòng {(pos?.line ?? 0) + 1} vào Redis.
                     </>
                   )}
                   {saveState === 'error' && 'Chưa lưu được vị trí đọc. Kiểm tra kết nối rồi lật trang lại.'}

@@ -25,6 +25,7 @@ import org.springframework.data.mongodb.core.query.TextQuery;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import vn.edu.huit.digitallibrary.catalog.dto.BookContent;
 import vn.edu.huit.digitallibrary.catalog.dto.BookDetail;
 import vn.edu.huit.digitallibrary.catalog.dto.BookRequest;
 import vn.edu.huit.digitallibrary.catalog.dto.BookSummary;
@@ -109,6 +110,15 @@ public class BookService {
             throw bookNotFound(bookId);
         }
         return BookDetail.from(book);
+    }
+
+    /** Toàn văn cả cuốn: E-Reader cần đủ mọi chương để đánh số trang liên tục trên toàn sách. */
+    public BookContent content(String bookId) {
+        Book book = mongoTemplate.findOne(byId(requireObjectId(bookId)), Book.class);
+        if (book == null) {
+            throw bookNotFound(bookId);
+        }
+        return BookContent.from(book);
     }
 
     public BookDetail create(CreateBookRequest request) {

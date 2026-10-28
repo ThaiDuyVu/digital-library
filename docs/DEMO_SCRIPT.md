@@ -5,10 +5,10 @@
 Backend chạy ngoài Docker nên **không tự đọc `.env`**: nếu Compose đổi cổng/credentials thì đặt `MONGO_URI`, `REDIS_URL` trong tiến trình backend trước khi chạy. Hợp đồng API hiện hành ở [SHARED.md](SHARED.md).
 
 ## Kịch bản 1 – Lưu tiến trình đọc (Redis Hashes)
-1. **Vũ** đăng nhập, đọc 1 cuốn sách đến **trang cuối của chương** (xem số ở "Trang x / y"), rồi **đóng trình duyệt**.
-2. Mở lại trình duyệt, **đăng nhập đúng tài khoản của Vũ** rồi chọn lại sách đó → hệ thống **tự mở đúng trang vừa dừng** kèm dòng "Tiếp tục từ chương …, trang …" (đọc từ Redis Hash).
+1. **Vũ** đăng nhập, đọc 1 cuốn sách đến **Trang 30**, rồi **đóng trình duyệt**.
+2. Mở lại trình duyệt, **đăng nhập đúng tài khoản của Vũ** rồi chọn lại sách đó → hệ thống **tự mở Trang 30** kèm dòng "Tiếp tục từ trang 30, dòng …" (đọc từ Redis Hash).
 
-> **Đừng demo "trang 30".** Giao diện chia 1.600 ký tự một trang, chương dài nhất trong kho chỉ có 7 trang, nên không thể đọc tới trang 30. Nếu mở một tài khoản seed (78% bản ghi đang ghi trang 20–40), thông báo sẽ nói "trang 37" trong khi màn hình hiện "Trang 7 / 7" — mâu thuẫn ngay trước hội đồng. Dùng tài khoản tự đăng ký và tự lật tới trang cuối chương. Chi tiết: [docs/vu/UI_EVIDENCE.md](vu/UI_EVIDENCE.md).
+> **Trang được đánh số liên tục trên cả cuốn sách**, không phải trong từng chương: trung bình mỗi sách 45 trang, nên Trang 30 luôn tới được. Có ô "nhảy tới trang" cạnh ô chọn chương nếu không muốn lật tay 30 lần. Bằng chứng duyệt mốc này trên Chrome thật: [docs/vu/UI_EVIDENCE.md](vu/UI_EVIDENCE.md).
 3. (Tùy chọn) Sơn mở Redis Insight cho thấy key `progress:{userId}:{bookId}`.
 
 > Tiến trình lưu theo từng tài khoản (`progress:{userId}:{bookId}`) và API chỉ cho chính chủ hoặc admin đọc. Nếu bước 2 đăng nhập bằng tài khoản khác thì nhận 404 và sách mở lại từ trang 1 — đó là đúng thiết kế, không phải lỗi. Sơn thao tác máy thì dùng phiên của Vũ.
@@ -24,7 +24,7 @@ Backend chạy ngoài Docker nên **không tự đọc `.env`**: nếu Compose �
 | Vai | Người |
 |---|---|
 | Điều phối + thao tác công cụ | Sơn |
-| Đọc đến trang cuối chương | Vũ |
+| Đọc đến Trang 30 | Vũ |
 | Đọc liên tục cho ZSET | Đạt |
 
 ## Dự phòng

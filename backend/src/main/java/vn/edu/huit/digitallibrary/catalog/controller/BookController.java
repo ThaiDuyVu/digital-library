@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import vn.edu.huit.digitallibrary.catalog.dto.BookContent;
 import vn.edu.huit.digitallibrary.catalog.dto.BookDetail;
 import vn.edu.huit.digitallibrary.catalog.dto.BookRequest;
 import vn.edu.huit.digitallibrary.catalog.dto.BookSummary;
@@ -55,6 +56,12 @@ public class BookController {
     @GetMapping("/{bookId}")
     public BookDetail get(@PathVariable String bookId) {
         return bookService.get(bookId);
+    }
+
+    /** Toàn văn cả cuốn cho E-Reader; {@code GET /{bookId}} vẫn trả mục lục không kèm nội dung. */
+    @GetMapping("/{bookId}/content")
+    public BookContent content(@PathVariable String bookId) {
+        return bookService.content(bookId);
     }
 
     @AdminOnly

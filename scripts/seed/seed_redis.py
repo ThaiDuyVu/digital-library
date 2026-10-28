@@ -6,7 +6,9 @@
   * Tạo 10 độc giả mẫu (`reader01`…`reader10`, mật khẩu `reader123`) với ID cố định
     (`5eed` + số thứ tự) để tiến trình đọc trỏ tới user có thật và đăng nhập demo được.
   * Ghi ≥ 50 Hash `progress:{userId}:{bookId}` (chapter, page, line, updatedAt) đúng quy ước
-    docs/SHARED.md; số chương không vượt số chương thật của sách.
+    docs/SHARED.md. Trang được đánh số liên tục trên CẢ CUỐN sách, đúng như E-Reader chia trang,
+    nên mọi vị trí seed đều mở lại được: `page` nằm trong tổng số trang thật của sách, `chapter`
+    là chương chứa trang đó, `line` nằm trong số khối văn bản của chính trang đó.
   * Ghi ZSET `ranking:books` gồm 50 sách bằng `ZADD` (đặt điểm, không cộng dồn) nên chạy lại
     cho cùng kết quả. Lượt đọc thật sau đó vẫn tăng qua `POST /api/books/{bookId}/read`.
   * Chỉ ghi/xóa key của user seed và member là sách seed; không đụng phiên đăng nhập hay dữ liệu khác.
@@ -22,6 +24,7 @@ import argparse
 import json
 import os
 import random
+import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -43,6 +46,72 @@ DEFAULT_PASSWORD = "reader123"
 DEFAULT_MONGO_URI = "mongodb://admin:admin123@localhost:27017/digital_library?authSource=admin"
 DEFAULT_REDIS_URL = "redis://localhost:6379"
 USER_CLASS = "vn.edu.huit.digitallibrary.identity.model.User"  # giống document Spring Data ghi
+
+# Phải khớp PAGE_CHARS trong frontend/src/features/reading/ReadingPage.jsx, nếu không thì
+# vị trí seed sẽ trỏ ra ngoài số trang mà giao diện thực sự chia được.
+PAGE_CHARS = 1600
+
+
+def _split_long(text: str, limit: int) -> list[str]:
+    """Bản port của splitLong() trong ReadingPage.jsx: cắt ở cuối câu, rồi tới khoảng trắng."""
+    chunks: list[str] = []
+    rest = text
+    while len(rest) > limit:
+        cut = rest.rfind(". ", 0, limit + 2)      # lastIndexOf('. ', limit) của JS
+        if cut < limit * 0.5:
+            cut = rest.rfind(" ", 0, limit + 1)   # lastIndexOf(' ', limit)
+        if cut < limit * 0.5:
+            cut = limit
+        chunks.append(rest[:cut + 1].strip())
+        rest = rest[cut + 1:].strip()
+    if rest:
+        chunks.append(rest)
+    return chunks
+
+
+def _blocks_of(chapter: dict) -> list[tuple[str, str]]:
+    blocks: list[tuple[str, str]] = []
+
+    def push_text(value) -> None:
+        for part in re.split(r"\n+", str(value if value is not None else "")):
+            trimmed = part.strip()
+            if trimmed:
+                blocks.extend(("p", chunk) for chunk in _split_long(trimmed, PAGE_CHARS))
+
+    push_text(chapter.get("content"))
+    for section in chapter.get("sections") or []:
+        if section.get("heading"):
+            blocks.append(("h", section["heading"]))
+        push_text(section.get("text"))
+    return blocks
+
+
+def paginate_chapter(chapter: dict) -> list[list[tuple[str, str]]]:
+    """Bản port của paginateChapter() trong ReadingPage.jsx."""
+    pages: list[list[tuple[str, str]]] = []
+    current: list[tuple[str, str]] = []
+    used = 0
+    for block in _blocks_of(chapter):
+        size = len(block[1])
+        if current and used + size > PAGE_CHARS:
+            orphan = current.pop() if current[-1][0] == "h" else None
+            pages.append(current)
+            current = [orphan] if orphan else []
+            used = len(orphan[1]) if orphan else 0
+        current.append(block)
+        used += size
+    if current:
+        pages.append(current)
+    return pages or [[]]
+
+
+def paginate_book(chapters: list[dict]) -> list[tuple[int, int]]:
+    """Trang liên tục trên cả cuốn; mỗi phần tử là (chapterNo, số khối của trang)."""
+    layout: list[tuple[int, int]] = []
+    for chapter in chapters:
+        for blocks in paginate_chapter(chapter):
+            layout.append((chapter.get("chapterNo"), len(blocks)))
+    return layout
 
 FULL_NAMES = [
     "Nguyễn Minh Anh", "Trần Gia Bảo", "Lê Thu Hà", "Phạm Quốc Huy", "Hoàng Ngọc Lan",
@@ -80,11 +149,16 @@ def make_progress(users: list[dict], books: list[dict], rng: random.Random, now:
     for u, user in enumerate(users):
         for k in range(BOOKS_PER_USER):
             book = books[(u * BOOKS_PER_USER + k) % len(books)]
+            layout = book["pages"]
+            if not layout:
+                continue  # sách chưa có nội dung thì không có vị trí đọc nào hợp lệ
             key = f"progress:{user['_id']}:{book['bookId']}"
+            page = rng.randint(1, len(layout))
+            chapter_no, block_count = layout[page - 1]
             progress[key] = {
-                "chapter": str(rng.randint(1, book["chapterCount"])),
-                "page": str(rng.randint(1, 40)),
-                "line": str(rng.randint(0, 30)),
+                "chapter": str(chapter_no),
+                "page": str(page),
+                "line": str(rng.randint(0, max(block_count - 1, 0))),
                 "updatedAt": iso_utc(now - timedelta(minutes=rng.randint(5, 14 * 24 * 60))),
             }
     return progress
@@ -105,16 +179,17 @@ def load_books(path: Path) -> list[dict]:
 
 
 def verify_books_in_mongo(db, books: list[dict]) -> None:
+    """Đọc toàn văn để tính đúng số trang mỗi sách; vị trí seed phải nằm trong số trang có thật."""
     ids = [ObjectId(b["bookId"]) for b in books]
-    found = {
-        str(d["_id"]): len(d.get("chapters", []))
-        for d in db.books.find({"_id": {"$in": ids}}, {"chapters.chapterNo": 1})
-    }
+    projection = {"chapters.chapterNo": 1, "chapters.content": 1, "chapters.sections": 1}
+    found = {str(d["_id"]): d.get("chapters", []) for d in db.books.find({"_id": {"$in": ids}}, projection)}
     missing = [b["bookId"] for b in books if b["bookId"] not in found]
     if missing:
         sys.exit(f"{len(missing)} bookId chưa có trong MongoDB (vd {missing[0]}). Chạy lại `python seed_books.py`.")
-    for b in books:  # dùng số chương thật trong DB, phòng khi admin đã sửa sách
-        b["chapterCount"] = found[b["bookId"]]
+    for b in books:  # dùng nội dung thật trong DB, phòng khi admin đã sửa sách
+        chapters = found[b["bookId"]]
+        b["chapterCount"] = len(chapters)
+        b["pages"] = paginate_book(chapters)
 
 
 def main() -> None:
@@ -132,13 +207,6 @@ def main() -> None:
     books = load_books(Path(args.ids))
     users = make_users(now)
 
-    if args.dry_run:
-        progress = make_progress(users, books, rng, now)
-        ranking = make_ranking(books, rng)
-        print(f"--dry-run: {len(users)} user, {len(progress)} Hash tiến trình, ZSET {len(ranking)} sách. Không ghi DB.")
-        return
-
-    import redis
     from pymongo import MongoClient, ReplaceOne
     from pymongo.errors import PyMongoError
 
@@ -148,7 +216,18 @@ def main() -> None:
     except PyMongoError as ex:
         sys.exit(f"Không kết nối được MongoDB ({ex.__class__.__name__}). Xem mục xử lý lỗi cổng 27017 trong docs/SHARED.md.")
     db = client.get_default_database(default="digital_library")
-    verify_books_in_mongo(db, books)
+    verify_books_in_mongo(db, books)  # cần đọc toàn văn mới biết mỗi sách có bao nhiêu trang
+
+    if args.dry_run:
+        progress = make_progress(users, books, rng, now)
+        ranking = make_ranking(books, rng)
+        pages = [len(b["pages"]) for b in books]
+        print(f"--dry-run: {len(users)} user, {len(progress)} Hash tiến trình, ZSET {len(ranking)} sách. "
+              f"Số trang mỗi sách: nhỏ nhất {min(pages)}, trung bình {sum(pages) // len(pages)}, lớn nhất {max(pages)}. "
+              f"Không ghi DB.")
+        return
+
+    import redis
 
     r = redis.Redis.from_url(args.redis_url, decode_responses=True)
     try:
