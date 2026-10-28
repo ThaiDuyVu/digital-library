@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Xoa khoa chong lap cua lan chay truoc (chi sandbox DB3)",
+    "detail": "0 khoa"
+  },
+  {
+    "name": "Nap doi chung vao ZSET sandbox",
+    "detail": "6ad9aafea64520f313150512 9 b00c00000000000000000001 7 b00c00000000000000000002 5 b00c00000000000000000029 2"
+  },
+  {
+    "name": "BXH truoc (UI)",
+    "detail": "[{\"hang\":1,\"ten\":\"Dế Mèn phiêu lưu ký\",\"diem\":\"9\",\"xuhuong\":\"—\"},{\"hang\":2,\"ten\":\"Câu chuyện về tấm bản đồ sao thất lạc\",\"diem\":\"7\",\"xuhuong\":\"—\"},{\"hang\":3,\"ten\":\"Dấu chân quanh căn biệt thự bỏ hoang\",\"diem\":\"5\",\"xuhuong\":\"—\"},{\"hang\":4,\"ten\":\"Hành trình đi tìm tương lai của loài người\",\"diem\":\"2\",\"xuhuong\":\"—\"}]"
+  },
+  {
+    "name": "POST /read da gui tu trinh duyet",
+    "detail": "9 request, tat ca 200"
+  },
+  {
+    "name": "ZSET sau khi doc",
+    "detail": "b00c00000000000000000029 10 6ad9aafea64520f313150512 9 b00c00000000000000000001 7 b00c00000000000000000002 5"
+  },
+  {
+    "name": "Chong tang lap 60s",
+    "detail": "truoc=10 sau khi mo lai chuong cu=10 -> DAT"
+  },
+  {
+    "name": "BXH sau (UI)",
+    "detail": "[{\"hang\":1,\"ten\":\"Hành trình đi tìm tương lai của loài người\",\"diem\":\"10\",\"xuhuong\":\"▲ 3 hạng\"},{\"hang\":2,\"ten\":\"Dế Mèn phiêu lưu ký\",\"diem\":\"9\",\"xuhuong\":\"▼ 1 hạng\"},{\"hang\":3,\"ten\":\"Câu chuyện về tấm bản đồ sao thất lạc\",\"diem\":\"7\",\"xuhuong\":\"▼ 1 hạng\"},{\"hang\":4,\"ten\":\"Dấu chân quanh căn biệt thự bỏ hoang\",\"diem\":\"5\",\"xuhuong\":\"▼ 1 hạng\"}]"
+  },
+  {
+    "name": "Thu hang cua sach muc tieu",
+    "detail": "truoc=4 sau=1"
+  },
+  {
+    "name": "I02",
+    "detail": "DAT - thu hang doi tren web"
+  }
+]

@@ -1,0 +1,96 @@
+[
+  {
+    "name": "Chrome headless=new mo cong CDP"
+  },
+  {
+    "name": "Dang ky qua UI",
+    "detail": "Đăng ký thành công. Hãy đăng nhập bằng tài khoản \"vu_i01\"."
+  },
+  {
+    "name": "Dang nhap",
+    "detail": "Vu I01VI"
+  },
+  {
+    "name": "userId trong Mongo",
+    "detail": "6ae191eff962b6d06886e14e"
+  },
+  {
+    "name": "Hash truoc khi doc",
+    "detail": "progress:6ae191eff962b6d06886e14e:b00c00000000000000000029 = (chua co)"
+  },
+  {
+    "name": "Mo sach lan dau",
+    "detail": "Chương 1: Người trở về vành đai tiểu hành tinhTrang 1 / 6"
+  },
+  {
+    "name": "Co resume-bar luc moi doc?",
+    "detail": "false"
+  },
+  {
+    "name": "So trang cua chuong 2",
+    "detail": "8"
+  },
+  {
+    "name": "Vi tri truoc khi dong tab",
+    "detail": "Chương 2: Chuyện về tấm bản đồ sao thất lạcTrang 8 / 8"
+  },
+  {
+    "name": "Trang thai luu tren UI",
+    "detail": "cloud_doneĐã lưu vị trí đọc vào Redis."
+  },
+  {
+    "name": "Hash Redis truoc khi dong tab",
+    "detail": "line 0 chapter 2 updatedAt 2026-10-28T06:10:56.967743Z page 8"
+  },
+  {
+    "name": "Request /api da gui",
+    "detail": "[{\"requestId\":\"56473.109\",\"method\":\"GET\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":404},{\"requestId\":\"56473.111\",\"method\":\"POST\",\"url\":\"/api/books/b00c00000000000000000029/read?chapterNo=1\",\"status\":200},{\"requestId\":\"56473.112\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.114\",\"method\":\"POST\",\"url\":\"/api/books/b00c00000000000000000029/read?chapterNo=2\",\"status\":200},{\"requestId\":\"56473.115\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.116\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.117\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.118\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.119\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.120\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200},{\"requestId\":\"56473.121\",\"method\":\"PUT\",\"url\":\"/api/progress/6ae191eff962b6d06886e14e/b00c00000000000000000029\",\"status\":200}]"
+  },
+  {
+    "name": "Da dong tab (Target.closeTarget)"
+  },
+  {
+    "name": "Mo lai: con dang nhap",
+    "detail": "Vu I01VI"
+  },
+  {
+    "name": "Thong bao khoi phuc",
+    "detail": "check_circleTiếp tục từ chương 2, trang 8."
+  },
+  {
+    "name": "Vi tri sau khi mo lai",
+    "detail": "Chương 2: Chuyện về tấm bản đồ sao thất lạcTrang 8 / 8"
+  },
+  {
+    "name": "I01 luong chinh",
+    "detail": "DAT"
+  },
+  {
+    "name": "Lat ve trang 7 roi dong tab ngay",
+    "detail": "save-status luc dong = \"Đang lưu vị trí đọc…\""
+  },
+  {
+    "name": "Hash Redis sau khi dong tab giua luc gui",
+    "detail": "line 0 chapter 2 updatedAt 2026-10-28T06:10:58.747851Z page 7"
+  },
+  {
+    "name": "I01 ca bien keepalive",
+    "detail": "DAT"
+  },
+  {
+    "name": "Dat cung tay Hash ve trang 30 (mo phong kich ban demo)",
+    "detail": "line 0 chapter 2 updatedAt 2026-10-28T06:10:58.747851Z page 30"
+  },
+  {
+    "name": "Thong bao noi gi",
+    "detail": "check_circleTiếp tục từ chương 2, trang 30."
+  },
+  {
+    "name": "Thuc te hien thi",
+    "detail": "Chương 2: Chuyện về tấm bản đồ sao thất lạcTrang 8 / 8"
+  },
+  {
+    "name": "Trang 30 co mo duoc?",
+    "detail": "KHONG - bi ket xuong trang cuoi"
+  }
+]

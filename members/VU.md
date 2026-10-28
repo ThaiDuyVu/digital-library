@@ -22,7 +22,7 @@
 - [x] Chốt cơ chế xác thực và quyền quản trị trước khi Sơn nối giao diện tài khoản
 - [x] Bổ sung báo cáo: kết quả đo hiệu năng, bảng so sánh Mongo vs Redis — bốn thao tác, 1000 mẫu/CSDL từ `scripts/seed/bench_latency.py`; bảng và cách đọc số liệu ở [ARCHITECTURE.md mục 5](../docs/ARCHITECTURE.md).
 - [ ] Hoàn thiện báo cáo cuối, rà soát barem — mục 6 ARCHITECTURE đã cập nhật theo kết quả merge Phase 2 (54 test, 0 lỗi) và các lỗi đã sửa; bản báo cáo nộp cuối cùng chưa tổng hợp.
-- [ ] Tham gia demo: đọc đến trang 30 rồi đóng trình duyệt — chờ tổng duyệt trên trình duyệt thật (I01), xem [biên bản tích hợp](../docs/PHASE2_INTEGRATION.md).
+- [ ] Tham gia demo: đọc rồi đóng trình duyệt — hành vi đã duyệt xong trên Chrome thật (I01 đạt, gồm cả ca đóng tab lúc `PUT` đang gửi), [bằng chứng](../docs/vu/UI_EVIDENCE.md). Vẫn để `[ ]` vì buổi tổng duyệt ba thành viên chưa diễn ra. Lưu ý: không demo "trang 30", xem [kịch bản demo](../docs/DEMO_SCRIPT.md).
 
 ## Definition of Done
 - Mọi endpoint CRUD test được qua Postman/curl; dữ liệu hiển thị đúng trong Compass.

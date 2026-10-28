@@ -51,7 +51,8 @@ Dữ liệu: mỗi lần chạy dùng **database Mongo mới** và **logical Red
 
 ## Còn lại
 
-- **I01/I02 chưa gỡ:** chưa có bằng chứng trên trình duyệt thật (đóng/mở lại tab khôi phục trang, thứ hạng nhảy trên web). Giao diện đã có và API đã đúng, nhưng build và curl không thay cho một lượt duyệt tay trên browser.
+- **I01/I02 đã gỡ (28/10/2026):** duyệt trên Chrome thật đối với mã trên `main` — đóng/mở lại tab khôi phục đúng chương 2 trang 8, và thứ hạng nhảy từ 4 lên 1 trên web. Gồm cả ca đóng tab lúc `PUT` đang gửi. Ảnh, nhật ký HTTP và kịch bản: [docs/vu/UI_EVIDENCE.md](vu/UI_EVIDENCE.md).
+- **Lỗi mới, chưa sửa — số trang đã lưu vượt số trang có thật:** giao diện chia 1.600 ký tự/trang nên chương dài nhất chỉ có 7 trang, trong khi 47/60 bản ghi tiến trình ở Redis DB0 ghi trang tới 40. Thanh thông báo nói "Tiếp tục từ chương 2, trang 30" còn vùng đọc hiện "Trang 8 / 8", và sai số này không bao giờ tự sửa. Thuộc phần Sơn (`scripts/seed/` và `frontend/src/features/reading/`); phân tích ở cùng tài liệu.
 - **Dữ liệu/manifest của Sơn** chưa đối chiếu; fixture `dat-fixture:v1:*` vẫn là bộ độc lập.
 - **Alias ID cũ** chưa migration, giữ nguyên theo `docs/dat/ID_NORMALIZATION.md`; cần duyệt phạm vi trước khi apply.
 - `GET /api/progress/{userId}` đã có ở backend nhưng giao diện chưa dùng; không phải điều kiện bắt buộc.

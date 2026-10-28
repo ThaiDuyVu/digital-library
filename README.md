@@ -23,7 +23,7 @@ Chi tiết: xem [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - Frontend: React + Vite
 - Hạ tầng: Docker Compose; công cụ quan sát: MongoDB Compass, Redis Insight
 
-Phase 1 đã tích hợp: API sách, chương, độc giả, đăng nhập (catalog, identity); API tiến trình đọc và bảng xếp hạng trên Redis (reading, ranking); giao diện kho sách, quản trị, tài khoản; script seed MongoDB + Redis (`scripts/seed/`). Phase 2 đã merge vào `main` ngày 28/10/2026: E-Reader lưu/khôi phục vị trí đọc, widget Top sách, chống lặp lượt đọc 60 giây và script đo hiệu năng — còn thiếu bằng chứng duyệt tay trên trình duyệt, xem [biên bản tích hợp](docs/PHASE2_INTEGRATION.md). Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
+Phase 1 đã tích hợp: API sách, chương, độc giả, đăng nhập (catalog, identity); API tiến trình đọc và bảng xếp hạng trên Redis (reading, ranking); giao diện kho sách, quản trị, tài khoản; script seed MongoDB + Redis (`scripts/seed/`). Phase 2 đã merge vào `main` ngày 28/10/2026: E-Reader lưu/khôi phục vị trí đọc, widget Top sách, chống lặp lượt đọc 60 giây và script đo hiệu năng; đã duyệt trên Chrome thật (I01/I02 đạt), xem [biên bản tích hợp](docs/PHASE2_INTEGRATION.md) và [bằng chứng trình duyệt](docs/vu/UI_EVIDENCE.md). Lượt duyệt phát hiện một lỗi chưa sửa về số trang đã lưu vượt số trang có thật. Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
 
 Backend tự tạo tài khoản quản trị `admin` / `admin123` khi khởi động lần đầu (đổi qua `ADMIN_USERNAME`, `ADMIN_PASSWORD`).
 
@@ -62,7 +62,8 @@ digital-library/
 │   ├── PLAN.md             # Kế hoạch 2 phase + barem checklist
 │   ├── DEMO_SCRIPT.md      # Kịch bản demo bảo vệ
 │   ├── PHASE2_INTEGRATION.md # Biên bản merge phase 2 + kết quả kiểm chứng
-│   └── SHARED.md           # Ranh giới code, quy ước dữ liệu, hợp đồng API
+│   ├── SHARED.md           # Ranh giới code, quy ước dữ liệu, hợp đồng API
+│   └── vu/UI_EVIDENCE.md   # Bằng chứng duyệt I01/I02 trên Chrome thật (+ ảnh, log)
 ├── members/
 │   ├── VU.md               # SV1 – Data Architect & CRUD Lead
 │   ├── DAT.md              # SV2 – Advanced Query Specialist (Redis)

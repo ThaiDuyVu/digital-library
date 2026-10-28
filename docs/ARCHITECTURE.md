@@ -361,4 +361,6 @@ Lỗi phát hiện khi rà soát Phase 2 (28/10/2026) và đã sửa:
 - `CurrentUser.canAccess` so chuỗi thô nên chính chủ gọi `/api/users/{userId}` bằng ObjectId hex **hoa** bị 403, trái với invariant chuẩn hóa ID mà reading/ranking đã áp dụng. Nay chuẩn hóa trước khi so quyền.
 - Nghiêm trọng hơn: `UserService` thu hồi phiên theo `userId` thô trên URL, mà khóa Redis là `user-sessions:{id chuẩn}`. Đổi mật khẩu qua ID hex hoa **không thu hồi phiên nào** dù [SHARED.md](SHARED.md) công bố "đổi mật khẩu thu hồi mọi phiên"; token cũ vẫn dùng được. Nay thu hồi theo id chuẩn của document. Hồi quy: `CurrentUserTest`, `UserServiceTest`.
 
-Phase 2 còn lại: bằng chứng duyệt tay trên trình duyệt cho E-Reader và bảng xếp hạng (I01/I02), tổng duyệt nhóm, migration alias ID cũ.
+I01 và I02 đã được duyệt trên Chrome thật đối với mã đang nằm trên `main`, kể cả ca đóng tab lúc `PUT` đang gửi mà trước đây còn để ngỏ: xem [docs/vu/UI_EVIDENCE.md](vu/UI_EVIDENCE.md). Lượt duyệt đó phát hiện thêm một lỗi chưa sửa — 78% bản ghi tiến trình đang trỏ tới số trang vượt quá số trang có thật của chương, khiến giao diện báo "trang 30" nhưng hiển thị trang cuối; chi tiết và hướng xử lý ở cùng tài liệu, phần thuộc Sơn.
+
+Phase 2 còn lại: sửa dữ liệu/giao diện cho lỗi số trang nói trên, tổng duyệt nhóm, migration alias ID cũ.
