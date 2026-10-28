@@ -46,6 +46,9 @@ Runtime được giữ từ các lượt trước: Mongo/Redis repo, Redis Insig
 
 ## Hợp đồng API để Sơn tích hợp
 
+> **Cập nhật 28/10/2026 (sau khi merge PR #8 và #9 vào main):** bảng dưới là trạng thái ngày 22/10/2026 và **đã lạc hậu ở dòng `POST /read`**. Hợp đồng hiện hành nằm ở [SHARED.md](../SHARED.md): endpoint này nay **cần Bearer token**, **bắt buộc `?chapterNo=`** và **chống lặp 60 giây** theo khóa `read-lock:{userId}:{bookId}:{chapterNo}`; đồng thời có thêm `GET /api/progress/{userId}` trả danh sách tiến trình. ReadingPage/RankingPage **không còn là placeholder** — Sơn đã triển khai ở PR #8. Giữ nguyên phần còn lại của tài liệu làm lịch sử bàn giao.
+
+
 | API | Quyền và request | Kết quả |
 |---|---|---|
 | PUT `/api/progress/{userId}/{bookId}` | Bearer token, chính chủ/admin; `{chapter:3,page:30,line:0}` dạng JSON với tên trường có dấu nháy, số nguyên; chapter/page>=1,line>=0 | 200 `{chapter,page,line,updatedAt}`; chương/sách phải tồn tại; admin target user phải tồn tại |

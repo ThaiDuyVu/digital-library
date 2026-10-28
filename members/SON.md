@@ -23,6 +23,8 @@
 - [ ] Mỗi lần mở chương → gọi API tăng lượt đọc
 - [ ] Widget **Top sách thịnh hành** (cập nhật định kỳ)
 
+> Trạng thái 28/10/2026: code của cả 5 mục trên đã merge vào `main` qua PR #8 (`ReadingPage`, `useSaveOnExit`, `TopBooksWidget`, tự cập nhật 10 giây). API tương ứng đã kiểm chứng đầu-cuối trên Mongo/Redis thật, [biên bản](../docs/PHASE2_INTEGRATION.md). Vẫn để `[ ]` vì các mục này là hành vi trên trình duyệt (tự mở đúng trang, gửi request khi đóng tab) mà chưa có bằng chứng duyệt tay — build và curl không thay cho một lượt chạy thật.
+
 ### D. Kiểm thử & quan sát
 - [ ] Thành thạo **MongoDB Compass** + **Redis Insight** chạy song song
 - [ ] Đo hiệu năng cùng Đạt, tổng hợp bảng số liệu

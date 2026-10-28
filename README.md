@@ -23,7 +23,7 @@ Chi tiết: xem [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - Frontend: React + Vite
 - Hạ tầng: Docker Compose; công cụ quan sát: MongoDB Compass, Redis Insight
 
-Phase 1 đã tích hợp: API sách, chương, độc giả, đăng nhập (catalog, identity); API tiến trình đọc và bảng xếp hạng trên Redis (reading, ranking); giao diện kho sách, quản trị, tài khoản; script seed MongoDB + Redis (`scripts/seed/`). Phase 2 còn E-Reader, widget Top sách và đo hiệu năng. Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
+Phase 1 đã tích hợp: API sách, chương, độc giả, đăng nhập (catalog, identity); API tiến trình đọc và bảng xếp hạng trên Redis (reading, ranking); giao diện kho sách, quản trị, tài khoản; script seed MongoDB + Redis (`scripts/seed/`). Phase 2 đã merge vào `main` ngày 28/10/2026: E-Reader lưu/khôi phục vị trí đọc, widget Top sách, chống lặp lượt đọc 60 giây và script đo hiệu năng — còn thiếu bằng chứng duyệt tay trên trình duyệt, xem [biên bản tích hợp](docs/PHASE2_INTEGRATION.md). Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
 
 Backend tự tạo tài khoản quản trị `admin` / `admin123` khi khởi động lần đầu (đổi qua `ADMIN_USERNAME`, `ADMIN_PASSWORD`).
 
@@ -61,6 +61,7 @@ digital-library/
 │   ├── ARCHITECTURE.md     # Giải trình Polyglot + thiết kế schema (barem mục 1)
 │   ├── PLAN.md             # Kế hoạch 2 phase + barem checklist
 │   ├── DEMO_SCRIPT.md      # Kịch bản demo bảo vệ
+│   ├── PHASE2_INTEGRATION.md # Biên bản merge phase 2 + kết quả kiểm chứng
 │   └── SHARED.md           # Ranh giới code, quy ước dữ liệu, hợp đồng API
 ├── members/
 │   ├── VU.md               # SV1 – Data Architect & CRUD Lead

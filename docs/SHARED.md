@@ -47,7 +47,7 @@ Trong mỗi domain backend có thể tạo `controller/`, `service/`, `repositor
 
 ## 4. API
 
-Tất cả endpoint nghiệp vụ dùng tiền tố `/api` và JSON. Lỗi chuẩn: `{ "code": "NOT_FOUND", "message": "..." }` do `common.GlobalExceptionHandler` sinh; ném `common.ApiException` trong service để trả lỗi này. Mã lỗi: `400 BAD_REQUEST` (dữ liệu sai), `401 UNAUTHORIZED`, `403 FORBIDDEN`, `404 NOT_FOUND` (kể cả id không phải ObjectId hợp lệ), `409 CONFLICT` (trùng).
+Tất cả endpoint nghiệp vụ dùng tiền tố `/api` và JSON. Lỗi chuẩn: `{ "code": "NOT_FOUND", "message": "..." }` do `common.GlobalExceptionHandler` sinh; ném `common.ApiException` trong service để trả lỗi này. Mã lỗi: `400 BAD_REQUEST` (dữ liệu sai), `401 UNAUTHORIZED`, `403 FORBIDDEN`, `404 NOT_FOUND` (kể cả id không phải ObjectId hợp lệ), `409 CONFLICT` (trùng). Thiếu query param bắt buộc (ví dụ `chapterNo`) cũng trả `400 BAD_REQUEST` dạng `{code,message}`: `GlobalExceptionHandler` bắt `MissingServletRequestParameterException` nên không lọt ra body mặc định của Spring (`timestamp/error/path`) — sửa trong `common/` ngày 28/10/2026 vì `chapterNo` là query param bắt buộc đầu tiên của dự án.
 
 | Nhóm | Endpoint | Người làm | Ghi chú |
 |---|---|---|---|
