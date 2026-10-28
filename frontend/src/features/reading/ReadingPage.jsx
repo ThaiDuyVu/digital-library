@@ -158,7 +158,7 @@ export function ReadingPage() {
         const key = `${bookId}:${chapterNo}`
         if (countedRef.current !== key) {
           countedRef.current = key
-          apiPost(`/books/${bookId}/read`).catch(() => {}) // lỗi đếm lượt không chặn việc đọc
+          apiPost(`/books/${bookId}/read?chapterNo=${chapterNo}`).catch(() => {}) // lỗi đếm lượt không chặn việc đọc
         }
       })
       .catch((err) => { if (active) setChapterError(err.message) })

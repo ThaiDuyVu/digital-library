@@ -1,5 +1,7 @@
 # Nghiệm thu phần Đạt — 22/10/2026
 
+> **Cập nhật 26/10/2026:** [GIAI_THICH_PHAN_DAT.md](GIAI_THICH_PHAN_DAT.md) là kết quả hiện tại: 16 Đạt, 0 Chưa đạt, 2 Bị chặn theo tiêu chí gốc. Backend/cleanup thật, manifest từ seed Sơn, phép đo mới và hai lượt browser đã qua. I01 còn thiếu ca đóng khi PUT đang gửi; I03 còn tổng duyệt nhóm/xác nhận Vũ. Các bảng/số liệu 22/10 bên dưới giữ làm lịch sử, không còn mô tả UI hiện tại.
+
 Kết quả hiện tại sau sửa F01/F02 và kiểm chứng Mongo/Redis thật: **14 Đạt, 0 Chưa đạt, 4 Bị chặn**. P02/R01 đã qua regression ID hoa/thường, xem [ID_NORMALIZATION.md](ID_NORMALIZATION.md). Bằng chứng đỏ review được giữ nguyên. R05 và I01–I03 còn chờ UI/nhóm; S01/S02/B01 chỉ đạt fixture riêng. Migration alias legacy chưa được duyệt hoặc chạy, không gọi toàn bộ hoàn thành.
 
 Nền Git `4a0dd9b31fdc17601e2891f5acf28f69b4d98954`, nhánh `codex/dat-work-dossier`, mã bổ sung chưa commit. Production ProgressService/RankingService đã sửa chuẩn hóa ObjectId; bằng chứng regression có fingerprint toàn bộ Java production. Các phần fixture/benchmark/UI không đổi.

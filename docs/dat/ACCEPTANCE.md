@@ -1,5 +1,7 @@
 # Tiêu chí nghiệm thu phần Đạt
 
+> Kết quả mới nhất 26/10/2026: [GIAI_THICH_PHAN_DAT.md](GIAI_THICH_PHAN_DAT.md). Giữ nguyên tiêu chí I01/I03; không dùng hai lượt tự động để khẳng định tổng duyệt nhóm hoặc bảo đảm request đang gửi lúc đóng browser. Các nhận định hiện trạng 22/10 bên dưới là lịch sử.
+
 Đây là tiêu chí kiểm chứng; kết quả chạy ngày 22/10/2026 ở [RESULTS.md](RESULTS.md) và PROGRESS.md. Kết quả hiện tại: [ACCEPTANCE_RESULTS.md](ACCEPTANCE_RESULTS.md), 14 Đạt/0 Chưa đạt/4 Bị chặn sau sửa F01/F02 và regression Mongo/Redis thật; xem [chuẩn hóa ID và migration còn chờ](ID_NORMALIZATION.md). R05 và I01–I03 vẫn Bị chặn; dữ liệu alias cũ chưa migration, manifest Sơn/UI/tổng duyệt chưa hoàn thành. Nguồn chính: `members/DAT.md`, `docs/SHARED.md`, `docs/PLAN.md`, `docs/ARCHITECTURE.md`, `docs/DEMO_SCRIPT.md`. Các chính sách chưa chốt xem DECISIONS; không tự chọn kỳ vọng rồi đánh dấu đạt.
 
 Điều kiện test: backend đúng commit, MongoDB/Redis đúng môi trường demo, user A/B và admin thật, token lấy qua login, ít nhất hai sách có chương hợp lệ. Ghi ID thật và trạng thái trước/sau; không lưu token/mật khẩu vào bằng chứng. Tách dữ liệu seed/benchmark khỏi dữ liệu thủ công đang dùng.

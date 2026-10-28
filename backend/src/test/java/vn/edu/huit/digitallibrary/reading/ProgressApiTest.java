@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.Optional;
+import java.util.List;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -26,6 +28,7 @@ import vn.edu.huit.digitallibrary.identity.event.UserDeletedEvent;
 import vn.edu.huit.digitallibrary.identity.model.Role;
 import vn.edu.huit.digitallibrary.identity.service.UserService;
 import vn.edu.huit.digitallibrary.reading.controller.ProgressController;
+import vn.edu.huit.digitallibrary.reading.dto.ProgressEntry;
 import vn.edu.huit.digitallibrary.reading.repository.ProgressRepository;
 import vn.edu.huit.digitallibrary.reading.service.ProgressService;
 
@@ -80,6 +83,45 @@ class ProgressApiTest {
 
     private void login() {
         given(users.authenticate("valid")).willReturn(Optional.of(new CurrentUser("u1", "reader", Role.USER)));
+    }
+
+    @Test
+    void progressListRequiresOwnerOrAdmin() throws Exception {
+        mvc.perform(get("/api/progress/u1")).andExpect(status().isUnauthorized());
+        login();
+        mvc.perform(get("/api/progress/u2").header("Authorization", "Bearer valid"))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(progress, books);
+    }
+
+    @Test
+    void progressListSkipsMissingBooksAndSortsNewestFirst() throws Exception {
+        login();
+        Instant old = Instant.parse("2026-10-26T00:00:00Z");
+        given(progress.findByUser("u1")).willReturn(List.of(
+                new ProgressEntry("old", 1, 2, 0, old),
+                new ProgressEntry("deleted", 1, 3, 0, old.plusSeconds(3)),
+                new ProgressEntry("new", 3, 30, 2, old.plusSeconds(1))));
+        given(books.exists("old")).willReturn(true);
+        given(books.exists("new")).willReturn(true);
+        mvc.perform(get("/api/progress/u1").header("Authorization", "Bearer valid"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].bookId").value("new"))
+                .andExpect(jsonPath("$[0].chapter").value(3)).andExpect(jsonPath("$[0].page").value(30))
+                .andExpect(jsonPath("$[0].line").value(2))
+                .andExpect(jsonPath("$[1].bookId").value("old"));
+    }
+
+    @Test
+    void emptyProgressListAndAdminCanonicalTarget() throws Exception {
+        String target = "5eed00000000000000000001";
+        given(users.authenticate("admin")).willReturn(Optional.of(new CurrentUser("admin", "admin", Role.ADMIN)));
+        given(progress.findByUser(target)).willReturn(List.of());
+        mvc.perform(get("/api/progress/" + target.toUpperCase(java.util.Locale.ROOT))
+                        .header("Authorization", "Bearer admin"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        verify(users).get(target);
+        verify(progress).findByUser(target);
     }
 
     @Test

@@ -1,6 +1,8 @@
 package vn.edu.huit.digitallibrary.reading.service;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import vn.edu.huit.digitallibrary.identity.auth.CurrentUser;
 import vn.edu.huit.digitallibrary.identity.event.UserDeletedEvent;
 import vn.edu.huit.digitallibrary.identity.service.UserService;
 import vn.edu.huit.digitallibrary.reading.dto.ProgressRequest;
+import vn.edu.huit.digitallibrary.reading.dto.ProgressEntry;
 import vn.edu.huit.digitallibrary.reading.dto.ProgressResponse;
 import vn.edu.huit.digitallibrary.reading.repository.ProgressRepository;
 
@@ -49,6 +52,17 @@ public class ProgressService {
                 .orElseThrow(() -> ApiException.notFound("Chưa có tiến trình đọc"));
     }
 
+    public List<ProgressEntry> list(String userId, CurrentUser currentUser) {
+        userId = canonicalId(userId);
+        requireUserAccess(userId, currentUser);
+        return progress.findByUser(userId).stream()
+                // Match GET's canonical-key policy; legacy aliases need an explicitly approved migration.
+                .filter(entry -> entry.bookId().equals(canonicalId(entry.bookId())))
+                .filter(entry -> books.exists(entry.bookId()))
+                .sorted(Comparator.comparing(ProgressEntry::updatedAt).reversed().thenComparing(ProgressEntry::bookId))
+                .toList();
+    }
+
     /** Xóa sách hoặc độc giả thì xóa tiến trình đọc liên quan. MongoDB đã xóa xong nên lỗi Redis chỉ ghi log. */
     @EventListener
     public void onBookDeleted(BookDeletedEvent event) {
@@ -69,15 +83,19 @@ public class ProgressService {
     }
 
     private void requireAccess(String userId, String bookId, CurrentUser currentUser) {
+        requireUserAccess(userId, currentUser);
+        if (!books.exists(bookId)) {
+            throw ApiException.notFound("Không tìm thấy sách " + bookId);
+        }
+    }
+
+    private void requireUserAccess(String userId, CurrentUser currentUser) {
         if (!currentUser.canAccess(userId)) {
             throw ApiException.forbidden("Không có quyền truy cập tiến trình đọc");
         }
         // Auth already verifies the current user; admin targets need a separate lookup.
         if (!currentUser.id().equals(userId)) {
             users.get(userId);
-        }
-        if (!books.exists(bookId)) {
-            throw ApiException.notFound("Không tìm thấy sách " + bookId);
         }
     }
 

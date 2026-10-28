@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import vn.edu.huit.digitallibrary.identity.auth.Authenticated;
+import vn.edu.huit.digitallibrary.identity.auth.CurrentUser;
 import vn.edu.huit.digitallibrary.ranking.dto.RankingEntry;
 import vn.edu.huit.digitallibrary.ranking.service.RankingService;
 
@@ -18,8 +20,9 @@ public class RankingController {
     }
 
     @PostMapping("/api/books/{bookId}/read")
-    public RankingEntry recordRead(@PathVariable String bookId) {
-        return ranking.recordRead(bookId);
+    @Authenticated
+    public RankingEntry recordRead(@PathVariable String bookId, @RequestParam int chapterNo, CurrentUser currentUser) {
+        return ranking.recordRead(bookId, chapterNo, currentUser);
     }
 
     @GetMapping("/api/ranking")

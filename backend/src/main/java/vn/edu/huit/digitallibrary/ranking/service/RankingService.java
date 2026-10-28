@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.huit.digitallibrary.catalog.event.BookDeletedEvent;
 import vn.edu.huit.digitallibrary.catalog.service.BookService;
 import vn.edu.huit.digitallibrary.common.ApiException;
+import vn.edu.huit.digitallibrary.identity.auth.CurrentUser;
 import vn.edu.huit.digitallibrary.ranking.dto.RankingEntry;
 import vn.edu.huit.digitallibrary.ranking.repository.RankingRepository;
 
@@ -24,12 +25,16 @@ public class RankingService {
         this.books = books;
     }
 
-    public RankingEntry recordRead(String bookId) {
+    public RankingEntry recordRead(String bookId, int chapterNo, CurrentUser currentUser) {
+        if (chapterNo < 1) {
+            throw ApiException.badRequest("chapterNo phải từ 1 trở lên");
+        }
         bookId = canonicalId(bookId);
         if (!books.exists(bookId)) {
             throw ApiException.notFound("Không tìm thấy sách " + bookId);
         }
-        return ranking.increment(bookId);
+        books.getChapter(bookId, chapterNo);
+        return ranking.increment(bookId, canonicalId(currentUser.id()), chapterNo);
     }
 
     public List<RankingEntry> top(int count) {

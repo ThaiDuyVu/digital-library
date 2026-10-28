@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -21,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import vn.edu.huit.digitallibrary.catalog.event.BookDeletedEvent;
 import vn.edu.huit.digitallibrary.catalog.service.BookService;
 import vn.edu.huit.digitallibrary.identity.service.UserService;
+import vn.edu.huit.digitallibrary.identity.auth.CurrentUser;
+import vn.edu.huit.digitallibrary.identity.model.Role;
 import vn.edu.huit.digitallibrary.ranking.controller.RankingController;
 import vn.edu.huit.digitallibrary.ranking.dto.RankingEntry;
 import vn.edu.huit.digitallibrary.ranking.repository.RankingRepository;
@@ -55,17 +58,47 @@ class RankingApiTest {
 
     @Test
     void missingBookDoesNotIncrement() throws Exception {
-        mvc.perform(post("/api/books/missing/read")).andExpect(status().isNotFound());
-        verifyNoInteractions(ranking, users);
+        login();
+        mvc.perform(post("/api/books/missing/read").param("chapterNo", "1")
+                        .header("Authorization", "Bearer valid")).andExpect(status().isNotFound());
+        verifyNoInteractions(ranking);
     }
 
     @Test
-    void recordReadIsPublicAndReturnsNewScore() throws Exception {
+    void authenticatedReadUsesCurrentUserAndChapter() throws Exception {
+        login();
         given(books.exists("book")).willReturn(true);
-        given(ranking.increment("book")).willReturn(new RankingEntry("book", 2));
-        mvc.perform(post("/api/books/book/read")).andExpect(status().isOk())
+        given(ranking.increment("book", "u1", 3)).willReturn(new RankingEntry("book", 2));
+        mvc.perform(post("/api/books/book/read").param("chapterNo", "3")
+                        .header("Authorization", "Bearer valid")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(2));
-        verifyNoInteractions(users);
+        verify(books).getChapter("book", 3);
+        verify(ranking).increment("book", "u1", 3);
+    }
+
+    @Test
+    void readRequiresLoginAndChapter() throws Exception {
+        mvc.perform(post("/api/books/book/read").param("chapterNo", "1")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/books/book/read").param("chapterNo", "1")
+                .header("Authorization", "Bearer invalid")).andExpect(status().isUnauthorized());
+        login();
+        mvc.perform(post("/api/books/book/read").header("Authorization", "Bearer valid"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(ranking, books);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "-1", "abc", "1.5", "2147483648"})
+    void invalidChapterDoesNotReachRedis(String chapter) throws Exception {
+        login();
+        mvc.perform(post("/api/books/book/read").param("chapterNo", chapter)
+                        .header("Authorization", "Bearer valid"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(ranking, books);
+    }
+
+    private void login() {
+        given(users.authenticate("valid")).willReturn(Optional.of(new CurrentUser("u1", "reader", Role.USER)));
     }
 
     @Test

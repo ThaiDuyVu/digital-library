@@ -63,7 +63,8 @@ Tất cả endpoint nghiệp vụ dùng tiền tố `/api` và JSON. Lỗi chu�
 | Xác thực | `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` | Vũ ✅ | logout và me cần token |
 | Độc giả | `GET/PUT/DELETE /api/users/{userId}` | Vũ ✅ | `@Authenticated`, chính chủ hoặc admin. PUT nhận `email`, `fullName`, `password` (trường nào null thì giữ nguyên); đổi mật khẩu thu hồi mọi phiên |
 | Tiến trình | `GET /api/progress/{userId}/{bookId}`, `PUT /api/progress/{userId}/{bookId}` | Đạt ✅ | Body PUT: `{"chapter":1,"page":1,"line":0}` |
-| Lượt đọc | `POST /api/books/{bookId}/read` | Đạt ✅ | Tăng score khi mở chương |
+| Tiến trình | `GET /api/progress/{userId}` | Đạt ✅ | Bearer, chính chủ/admin; mảng `{bookId,chapter,page,line,updatedAt}`, mới nhất trước; không có trả `[]`, bỏ sách không tồn tại |
+| Lượt đọc | `POST /api/books/{bookId}/read?chapterNo=1` | Đạt ✅ | Bearer token; tăng tối đa1/user/sách/chương trong60giây; lặp200/điểm không tăng |
 | Xếp hạng | `GET /api/ranking?top=10` | Đạt ✅ | Trả `[{ "bookId": "...", "score": 42 }]`; Sơn ghép sách từ API catalog |
 
 Vũ và Đạt nên đưa ví dụ response thật vào đây khi endpoint hoàn thành. Nếu endpoint trả DTO khác dự kiến, cập nhật bảng trước khi Sơn nối giao diện.
@@ -140,7 +141,7 @@ D01–D05 được người dùng xác nhận; chỉ thay phần reading/ranking
 
 - GET/PUT `/api/progress/{userId}/{bookId}` cần Bearer token, chính chủ/admin. PUT nhận JSON số nguyên `{"chapter":3,"page":30,"line":0}`; thiếu/null, số thực, chuỗi số, sai kiểu hoặc dưới min → 400. GET/PUT thành công trả 200 `{"chapter":3,"page":30,"line":0,"updatedAt":"2026-10-22T13:00:00Z"}` (timestamp minh họa, thời gian thật theo server).
 - GET chưa có progress → 404 NOT_FOUND; UI chọn vị trí mở đầu. Sách không tồn tại/sai id → 404; PUT xác minh chương tồn tại qua BookService. Chưa áp max page/line vì phụ thuộc phân trang frontend. Admin thao tác user khác phải có user tồn tại; người không có quyền vẫn nhận 403 trước lookup.
-- POST `/api/books/{bookId}/read` công khai, trả 200 `{"bookId":"...","score":42.0}`. Mỗi request thành công tăng 1 bằng ZINCRBY; reload/retry cũng tăng, chưa có chống lặp. UI gọi một lần theo mỗi lần mở chương; endpoint chưa nhận chapter.
+- POST `/api/books/{bookId}/read?chapterNo=1` cần Bearer token (người dùng đã chọn chống lặp26/10/2026), trả200 `{"bookId":"...","score":42.0}`. `chapterNo` bắt buộc, số nguyên>=1; thiếu/sai400, sách/chương mất404. User lấy từ phiên đã xác thực, không nhận userId client. Khóa `read-lock:{userId}:{bookId}:{chapterNo}` bằng SET NX EX60 và ZINCRBY trong cùng Lua script: cùng user/sách/chương trong60giây không tăng lại, không gia hạn khóa; user/chương khác tính riêng. Request lặp trả điểm hiện tại, không tự tăng; GET ranking vẫn công khai. Frontend ReadingPage đã truyền chapterNo.
 - GET `/api/ranking?top=10` công khai, mảng `{bookId,score}`, top cho phép 1–100, ngoài biên/không nguyên → 400. Hòa điểm theo member giảm dần của Redis; không có tiêu chí hòa điểm nghiệp vụ riêng.
 - Xóa sách tự `ZREM` khỏi `ranking:books` và xóa `progress:*:{bookId}`; xóa độc giả tự xóa `progress:{userId}:*` (sự kiện `BookDeletedEvent`/`UserDeletedEvent`, cập nhật 23/10/2026). Sơn vẫn ghép metadata qua batch và bỏ qua ID mất.
 
