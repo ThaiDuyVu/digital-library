@@ -18,6 +18,8 @@ Cổng đọc sách điện tử trực tuyến cho phép:
 
 Chi tiết: xem [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+Học cách Redis được dùng trong project: [Học Redis qua Thư viện số](docs/HOC_REDIS_TRONG_PROJECT.md) — nền tảng, sơ đồ luồng thực tế và bài tập CLI.
+
 ## 3. Công nghệ
 - Backend: Java 17+, Spring Boot, Spring Data MongoDB, Spring Data Redis, Maven
 - Frontend: React + Vite
@@ -26,6 +28,8 @@ Chi tiết: xem [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 Phase 1 đã tích hợp: API sách, chương, độc giả, đăng nhập (catalog, identity); API tiến trình đọc và bảng xếp hạng trên Redis (reading, ranking); giao diện kho sách, quản trị, tài khoản; script seed MongoDB + Redis (`scripts/seed/`). Phase 2 đã merge vào `main` ngày 28/10/2026: E-Reader lưu/khôi phục vị trí đọc, widget Top sách, chống lặp lượt đọc 60 giây và script đo hiệu năng; đã duyệt trên Chrome thật (I01/I02 đạt), xem [biên bản tích hợp](docs/PHASE2_INTEGRATION.md) và [bằng chứng trình duyệt](docs/vu/UI_EVIDENCE.md). E-Reader đánh số trang liên tục trên cả cuốn sách và lưu cả vị trí dòng, nên mốc "Trang 30" trong [yêu cầu đề tài](docs/YC_PJ.md) đã đạt. Xem [phần dùng chung và hợp đồng tích hợp](docs/SHARED.md).
 
 Backend tự tạo tài khoản quản trị `admin` / `admin123` khi khởi động lần đầu (đổi qua `ADMIN_USERNAME`, `ADMIN_PASSWORD`).
+
+Tính năng bổ sung ngoài phạm vi yêu cầu chính: tab **Đề xuất sách** cho độc giả gửi tên sách, tác giả và lời nhắn (tối đa 1 lượt/tài khoản). Admin xem danh sách, lọc và phản hồi tại **Quản lý đề xuất**; độc giả nhận phản hồi trong tab của mình. Nút VIP mang tính vui vẻ, hiện thông báo sắp ra mắt và chưa tăng hạn mức. Xem [hướng dẫn đề xuất sách](docs/BOOK_SUGGESTIONS.md).
 
 ## 4. Khởi chạy nhanh (cho cả 3 thành viên)
 ```bash

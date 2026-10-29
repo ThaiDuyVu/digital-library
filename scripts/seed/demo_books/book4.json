@@ -1,0 +1,167 @@
+[
+  {
+    "_id": "b00c0000000000000000000b",
+    "title": "Giáo sư Đài và tín hiệu lạ từ vũ trụ",
+    "author": "Văn Khoa",
+    "categories": [
+      "Khoa học viễn tưởng"
+    ],
+    "description": "Đài thiên văn Mây Trắng bắt được một tín hiệu vô tuyến băng hẹp kỳ lạ, lặp lại chính xác mỗi 77 phút từ chòm sao Thiên Nga. Giáo sư Đài, người chuẩn bị nghỉ hưu sau bốn mươi năm gắn bó, cùng nhóm nghiên cứu trẻ bước vào hành trình giải mã. Họ không ngờ rằng, tín hiệu ấy chính là lời hồi đáp bị chỉnh sửa cho thông điệp mà ông từng lén phát đi vào không gian từ bốn thập kỷ trước – một thông điệp mà người nhận câu trả lời cuối cùng chính là thế hệ tương lai.",
+    "chapters": [
+      {
+        "chapterNo": 1,
+        "title": "Tín hiệu lúc ba giờ sáng",
+        "content": "Căn phòng điều hành đài thiên văn Mây Trắng nằm biệt lập trên đỉnh núi cao hơn một ngàn mét so với mực nước biển, nơi sương mù đêm bao phủ quanh năm và cái lạnh luôn găm vào từng thấu kính. Lúc ba giờ mười lăm phút sáng, khi không gian ngoài cửa kính chỉ còn một màu đen đặc quánh và tiếng gió rít qua những giàn khung thép, tiếng chuông cảnh báo từ máy phổ tần đột ngột vang lên từng hồi ngắn, sắc lẹm. Tú Anh, nghiên cứu sinh năm cuối chuyên ngành thiên văn vô tuyến, giật mình ngẩng dậy khỏi đống tài liệu thực tập chất đống trên bàn. Cô dụi đôi mắt đã đỏ ngầu vì thức đêm, vội vã đưa tay nhấn phím kiểm tra dải sóng.\\n\\nTrên màn hình máy tính chính, dải phổ tần xanh lá vốn phẳng lặng như mặt hồ đóng băng đột nhiên xuất hiện một đỉnh nhọn hoắt, bùng lên vượt khỏi ngưỡng phông nền vũ trụ ở đúng tần số 1.420 GHz – vạch chuyển dịch hydro trung tính, dải tần vốn được xem là 'vùng yên tĩnh' thiêng liêng của không gian. Cô dụi mắt, thao tác lọc nhiễu tự động ba lần liên tiếp để loại bỏ khả năng sấm sét địa phương hay sóng vô tuyến vô tuyến truyền hình, nhưng vạch sóng vẫn đứng yên, sừng sững như một ngọn tháp nhọn. Điều kỳ lạ là dải sóng này cực kỳ hẹp, chỉ rộng chưa đầy 5 Hz, hoàn toàn khác biệt với các bức xạ tự nhiên vốn bao giờ cũng trải rộng từ các đám mây khí hay sao xung.\\n\\nTú Anh dán mắt vào chiếc đồng hồ nguyên tử trên góc màn hình. Đúng 77 phút sau mốc bùng phát thứ nhất, vào lúc bốn giờ ba mươi hai phút, dải sóng ấy lại bùng lên một lần nữa với cùng một cường độ, cùng độ dài chính xác mười hai giây rồi vụt tắt không để lại một vệt nhiễu dư thừa nào. Tay cô bắt đầu run rẩy. Cô nhấc chiếc điện thoại bàn màu đen đã tróc sơn, bấm số máy nội bộ dẫn xuống căn nhà công vụ phía dưới chân đồi, nơi Giáo sư Đài đang lưu trú.\\n\\nGiáo sư Đài có mặt tại phòng điều hành mươi phút sau đó. Ông đã sáu mươi lăm tuổi, mái tóc đã điểm bạc gần hết và chỉ còn vỏn vẹn vài tháng nữa là chính thức nhận quyết định nghỉ hưu sau hơn bốn mươi năm gắn bó với từng vòng quay ăngten. Ông lặng lẽ đeo kính lão, kéo chiếc ghế xoay ngồi xuống trước hệ thống lưu trữ dữ liệu thô và xem xét từng vệt sóng. Gương mặt trầm ngâm của ông không để lộ chút đường nét vội vã nào, nhưng ngón tay trỏ đang gõ nhẹ từng nhịp đều đặn lên mặt bàn gỗ cho thấy một sự dao động mãnh liệt đang diễn ra trong lòng. Tín hiệu này hoàn toàn không mang đặc tính của sao xung pulsar, không phải tia chớp vô tuyến FRB, và càng không phải nhiễu khí quyển.\\n\\n\"Thầy nghĩ sao ạ? Có thể là do vệ tinh địa tĩnh mới phóng của quân sự hoặc lỗi đường truyền bộ thu cryo không?\" Tú Anh hồi hộp hỏi, giọng cô lạc đi giữa tiếng quạt gió của cụm máy chủ. Giáo sư Đài lắc đầu chậm rãi, mắt vẫn không rời đồ thị hiển thị biên độ sóng. Ông trầm ngâm đáp rằng các vệ tinh thương mại lẫn quân sự đều tuân thủ nghiêm ngặt việc không phát sóng ở dải tần bảo vệ hydro, và quan trọng nhất, không một thiết bị nhân tạo nào dưới Trái Đất lại lập trình một chu kỳ lặp lại đúng 77 phút một cách tuyệt đối như vậy. Ông quay sang dặn cô lưu toàn bộ dữ liệu thô vào hai ổ cứng độc lập, niêm phong nhật ký ca trực và tuyệt đối không tiết lộ với bất kỳ ai trước khi có sự kiểm tra toàn diện của bộ phận kỹ thuật.\\n\\nSự im lặng trong phòng điều hành lúc này trở nên nặng nề và thiêng liêng một cách kỳ lạ. Bên ngoài, những áng mây mù cuồn cuộn tràn qua giàn khung kim loại của đài quan sát, tạo ra tiếng va đập rì rào như sóng biển xa khơi. Giáo sư Đài đứng dậy, bước chậm đến bên ô cửa sổ lớn nhìn ra khoảng không mênh mông đằng xa. Trong suốt bốn mươi năm làm việc tại đỉnh Mây Trắng, ông đã chứng kiến hàng ngàn hiện tượng thiên văn kỳ thú, từ những trận mưa sao băng rực rỡ cho đến các xung bức xạ bí ẩn từ những thiên hà cách xa hàng triệu năm ánh sáng. Tuy nhiên, chưa một lần nào ông cảm nhận được sự hiện diện trực tiếp, rõ ràng và có chủ đích của một ý thức khác ngoài Trái Đất như vào đêm nay.\\n\\nTú Anh vẫn ngồi lặng lẽ trước màn hình máy tính, đôi tay cô không ngừng gõ phím để sao lưu từng bit dữ liệu vào các phân vùng lưu trữ bảo mật. Cô nhìn tấm lưng hơi còng của Giáo sư Đài in bóng trên nền kính mờ sương, lòng trào dâng một niềm xúc động khó tả. Cô biết rằng đối với một nhà khoa học sắp khép lại sự nghiệp như ông, phát hiện này vừa là một món quà vô giá của định mệnh, vừa là một thách thức vô cùng lớn lao. Nếu tín hiệu này thực sự là một thông điệp nhân tạo từ nền văn minh xa xôi, toàn bộ lịch sử nhân loại và hiểu biết của chúng ta về vị thế của Trái Đất trong vũ trụ sẽ phải viết lại từ đầu.",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Tín hiệu băng hẹp",
+            "text": "Tín hiệu xuất hiện ở tần số 1.420 GHz với độ rộng dải cực hẹp chỉ 5 Hz, cường độ vượt trội so với phông nền vũ trụ."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Chu kỳ 77 phút",
+            "text": "Tín hiệu lặp lại chính xác sau mỗi 77 phút, kéo dài mười hai giây rồi biến mất hoàn toàn."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Thái độ của Giáo sư Đài",
+            "text": "Giáo sư Đài yêu cầu niêm phong dữ liệu thô và giữ kín thông tin để tiến hành kiểm tra kỹ thuật toàn diện."
+          }
+        ]
+      },
+      {
+        "chapterNo": 2,
+        "title": "Chiếc ăngten hướng về chòm Thiên Nga",
+        "content": "Sáng sớm hôm sau, khi sương mù bắt đầu tan chậm trên các vách đá, Bảo – kỹ sư trưởng hệ thống ăngten của đài Mây Trắng – mang theo bộ đồ nghề nặng trịch leo lên mâm chảo phản xạ đường kính ba mươi mét. Giữa cái lạnh cắt da của đỉnh núi, anh cẩn thận kiểm tra từng bộ thu tín hiệu cryo được làm lạnh bằng heli lỏng xuống nhiệt độ cận độ K tuyệt đối, kiểm tra các đường cáp đồng trục dẫn truyền và hệ thống bộ lọc tần số. Sau bốn tiếng rà soát tỉ mỉ từng con ốc và khớp quay thủy lực, Bảo trèo xuống, mặt bết mồ hôi dù trời giá lạnh, và khẳng định không có bất kỳ hiện tượng chập mạch, rò rỉ điện hay lỗi phần cứng nào có thể tự tạo ra xung sóng nhọn như vậy.\\n\\nĐể loại trừ hoàn toàn khả năng nhiễu địa phương từ các trạm viễn thông dưới chân núi hay thiết bị vô tuyến của người dân trong vùng, Bảo quyết định thực hiện một thử nghiệm điều hướng chảo ăngten khẩn cấp. Khi anh điều khiển mâm chảo quay lệch khỏi tọa độ ban đầu năm độ góc, màn hình hiển thị hoàn toàn phẳng lặng tại mốc chu kỳ 77 phút tiếp theo. Nhưng ngay khi mâm chảo được quay trở lại đúng tọa độ ban đầu hướng về phía chòm sao Thiên Nga (Cygnus), đỉnh sóng băng hẹp lại xuất hiện đúng từng mili giây, bùng lên rực rỡ rồi biến mất sau mười hai giây.\\n\\nĐiều này là bằng chứng không thể chối cãi: nguồn phát thực sự nằm ngoài không khí Trái Đất, tọa lạc tại một điểm cố định trong không gian sâu và đang chuyển động quay cùng với tâm vũ trụ. Giáo sư Đài đứng tựa lưng vào lan can sắt của đài quan sát, nhìn mâm chảo khổng lồ màu trắng đang từ từ hướng lên bầu trời ngàn sao. Ông nhớ lại những ngày đầu thành lập đài Mây Trắng cách đây bốn thập kỷ, khi cơ sở vật chất còn thiếu thốn đến mức phải tự tay quấn từng vòng dây đồng, và ước mơ chạm tới những bí ẩn vũ trụ tưởng chừng như chỉ có trong tiểu thuyết viễn tưởng.\\n\\nBảo bước vào phòng máy, chìa ra bảng ghi nhận thông số góc quay chính xác của ăngten. Anh xác nhận tọa độ nguồn phát trùng khớp với một vùng không gian tưởng chừng như trống rỗng nằm gần hệ sao đôi Cygnus X-1. Tú Anh đứng bên cạnh, liên tục nhấn nút chụp và ghi chép lại các dạng biến đổi biên độ. Nhóm nghiên cứu bốn người bắt đầu nhận ra họ không còn đơn thuần là những người gác đêm vô tuyến, mà đang đứng trước ngưỡng cửa của một hiện tượng có thể làm thay đổi hoàn toàn hiểu biết của nhân loại về vị thế của mình trong khoảng không bao la.\\n\\nCái lạnh của buổi sáng vùng núi dường như bị xua tan bởi không khí căng tràn nhiệt huyết và sự hồi hộp đang bao trùm lấy phòng máy. Bảo vắt chiếc khăn bông lên vai, rót một cốc cà phê nóng rồi ngồi xuống cạnh Tú Anh. Anh lật mở các sơ đồ kỹ thuật của chảo ăngten, vừa chỉ tay vào các thông số biên độ sóng vừa nhận xét rằng độ nhạy của bộ thu cryo hiện tại đang hoạt động ở mức tối đa. Nếu nguồn phát có công suất đủ lớn để vượt qua khoảng cách hàng chục năm ánh sáng mà vẫn giữ được độ rộng dải cực hẹp 5 Hz, nguồn năng lượng đứng sau nó phải đạt đến cấp độ vô cùng kinh ngạc.\\n\\nGiáo sư Đài bước lại gần bàn làm việc, ánh mắt ông dừng lại rất lâu trên sơ đồ tọa độ chòm sao Thiên Nga. Chòm sao ấy vốn được biết đến trong thần thoại như một con chim thiên nga đang giang rộng đôi cánh bay qua dải Ngân Hà. Trong thiên văn học hiện đại, vùng không gian xung quanh Cygnus X-1 là một trong những khu vực phức tạp nhất, chứa đựng cả lỗ đen, các ngôi sao biến quang và những đám mây bụi khí khổng lồ. Việc một tín hiệu mang cấu trúc nhân tạo xuất hiện từ vùng không gian ấy không chỉ là một ẩn số toán học, mà còn là một câu đố triết học đầy mê hoặc dành cho nhóm nghiên cứu trẻ.",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Kiểm tra phần cứng",
+            "text": "Kỹ sư Bảo xác nhận hệ thống bộ thu cryo và cáp tín hiệu hoạt động hoàn hảo, không có lỗi kỹ thuật."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Tọa độ nguồn phát",
+            "text": "Tín hiệu chỉ xuất hiện khi chảo ăngten hướng chính xác vào tọa độ thuộc chòm sao Thiên Nga (Cygnus)."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Loại trừ nhiễu",
+            "text": "Thử nghiệm lệch góc quay cho thấy tín hiệu không xuất phát từ các nguồn nhiễu dưới mặt đất hay vệ tinh."
+          }
+        ]
+      },
+      {
+        "chapterNo": 3,
+        "title": "Chuỗi số của Diệp",
+        "content": "Nhận được lời mời cẩn trọng và khẩn cấp từ Giáo sư Đài, Diệp – nhà toán học kiêm chuyên gia phân tích dữ liệu hàng đầu thuộc Viện Viễn thông – đã lập tức có mặt tại đài Mây Trắng. Cô mang theo hệ thống máy tính xách tay chuyên dụng cùng các thuật toán phân tích phổ nâng cao, nhanh chóng bắt tay vào việc chuyển đổi toàn bộ cường độ sóng vô tuyến thu được thành chuỗi dữ liệu nhị phân dựa trên sự biến thiên biên độ cao thấp của từng xung mười hai giây.\\n\\nSau hai ngày làm việc liên tục không nghỉ, căn phòng làm việc của Diệp ngập tràn những tờ giấy nháp vẽ đồ thị nhị phân. Cô triệu tập một cuộc họp hẹp chỉ gồm Giáo sư Đài, Tú Anh và Bảo. Diệp chiếu lên màn hình một ma trận gồm đúng 1.024 bit dữ liệu. Cô giải thích rằng con số 1.024 là lũy thừa của 2 (2^10). Khi xếp chuỗi 1.024 bit này thành một lưới vuông kích thước 32x32, toàn bộ các số 1 và 0 biến thành một hình vẽ đối xứng kỳ diệu. Đó không phải là một chuỗi biến động ngẫu nhiên, mà là một cấu trúc toán học biểu diễn các số nguyên tố đầu tiên từ 2, 3, 5, 7 cho đến 101.\\n\\n\"Đây tuyệt đối không phải là sản phẩm của tự nhiên,\" Diệp khẳng định với giọng nói đanh thép nhưng đôi bàn tay không giấu nổi sự run rẩy vì xúc động. \"Tự nhiên hay các ngôi sao chết không thể ngẫu nhiên tạo ra một ma trận hình học chứa các số nguyên tố và có tính chất đối xứng qua hai trục hoàn hảo như thế này. Có một trí tuệ nào đó đang cố tình gửi tin nhắn này, và họ muốn đảm bảo rằng bất kỳ nền văn minh nào thu được cũng dễ dàng nhận ra đây là tín hiệu nhân tạo.\"\\n\\nTú Anh nhìn ma trận số rực sáng trên màn hình, cảm thấy sống lưng mình lạnh ngắt vì một niềm hân hoan lẫn sợ hãi. Sự xuất hiện của toán học – ngôn ngữ chung duy nhất của vũ trụ – trong tín hiệu từ chòm sao Thiên Nga là bằng chứng khẳng định sự tồn tại của người ngoài Trái Đất. Giáo sư Đài im lặng ngắm nhìn hình vẽ đối xứng, ngón tay ông vô thức xiết chặt mép bàn gỗ. Ông nhận ra cấu trúc của ma trận này có một nét gì đó quen thuộc một cách kỳ lạ, giống như một bóng hình ký ức sâu thẳm đã bị thời gian bụi phủ suốt bốn mươi năm qua.\\n\\nDiệp đứng trước bảng trắng, dùng bút lông vẽ lại hai trục đối xứng của ma trận 32x32. Cô chỉ ra rằng khi lật ma trận theo chiều dọc, các ô nhị phân biểu diễn các số nguyên tố trùng khớp lên nhau một cách tuyệt đối, tạo thành các đường nét hình học gợi liên tưởng đến sơ đồ cấu trúc của một nguyên tử hydro đơn giản. Sự tinh tế trong việc lồng ghép kiến thức toán học và vật lý vào một dải dữ liệu vẻn vẹn 1.024 bit cho thấy trí tuệ tạo ra nó không chỉ làm chủ công nghệ viễn thông mà còn hiểu rất rõ cách giao tiếp với các văn minh khác.\\n\\nBảo ngả người ra phía sau ghế, khoanh tay trước ngực và thốt lên rằng đây chính là chiếc 'chìa khóa vàng' mà nhân loại đã tìm kiếm suốt hàng thập kỷ qua trong các chương trình SETI (Tìm kiếm Trí tuệ Ngoài Trái Đất). Tuy nhiên, Giáo sư Đài vẫn giữ sự trầm ngâm lạ thường. Ông hỏi Diệp liệu có còn thành phần nào khác ẩn dưới các lớp biên độ sóng bị nhiễu hay không. Diệp gật đầu, cô thừa nhận rằng ở rìa ngoài của chuỗi 1.024 bit vẫn còn một dải dư chấn nhỏ biến đổi theo chu kỳ, giống như một chữ ký mã hóa tinh vi mà cô cần thêm thời gian để bóc tách.",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Chuyển đổi nhị phân",
+            "text": "Dữ liệu biên độ sóng được Diệp chuyển đổi thành chuỗi mã nhị phân gồm 1.024 bit."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Ma trận số nguyên tố",
+            "text": "Khi xếp thành lưới 32x32, chuỗi dữ liệu tạo thành ma trận đối xứng biểu diễn các số nguyên tố đầu tiên."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Xác nhận trí tuệ ngoài Trái Đất",
+            "text": "Cấu trúc toán học khẳng định tín hiệu do một trí tuệ tạo ra chứ không phải hiện tượng tự nhiên."
+          }
+        ]
+      },
+      {
+        "chapterNo": 4,
+        "title": "Quyết định của Giám đốc Cường",
+        "content": "Sự xuất hiện thường xuyên của nhà toán học Diệp tại đài Mây Trắng và những chuyển động bất thường trong phòng điều hành ban đêm không thể qua mắt được Giám đốc Viện – ông Cường. Trong một chuyến lên kiểm tra cơ sở vật chất đột xuất, ông Cường đã trực tiếp bắt gặp nhóm nghiên cứu đang vây quanh ma trận dữ liệu nhị phân của Diệp. Bằng sự nhạy bén của một nhà quản lý lâu năm, ông lập tức nhận ra tầm vóc kinh thiên động địa và giá trị truyền thông khổng lồ của phát hiện này.\\n\\nÔng Cường đề nghị gọi họp báo quốc tế ngay lập tức để công bố với truyền thông trong và ngoài nước. Theo góc nhìn của ông, một phát hiện mang tính lịch sử như vậy sẽ lập tức biến đài Mây Trắng thành trung tâm chú ý của thế giới, mang về những khoản ngân sách tài trợ khổng lồ từ các quỹ khoa học quốc tế, đồng thời nâng cao vị thế cá nhân ông và Viện trên bản đồ khoa học. Ông nhấn mạnh rằng việc chậm trễ dù chỉ một ngày cũng có thể khiến các đài thiên văn khổng lồ ở nước ngoài phát hiện ra và tranh mất quyền ưu tiên công bố.\\n\\nGiáo sư Đài kiên quyết phản đối ý định của Giám đốc Cường. Ông argument rằng việc công bố hấp tấp khi chưa giải mã trọn vẹn nội dung sâu bên trong và chưa xác minh bản chất nguồn phát có thể gây ra sự hoảng loạn không cần thiết cho công chúng, hoặc tạo ra những xung đột địa chính trị phức tạp. Ông muốn nhóm có thêm thời gian để nghiên cứu kỹ lưỡng trong sự bảo mật tuyệt đối, đảm bảo tính chính xác tuyệt đối của từng dòng dữ liệu.\\n\\nCuộc tranh luận giữa hai tư duy – một bên là nhà khoa học thuần túy cẩn trọng, một bên là nhà quản lý nhạy bén với cơ hội – diễn ra vô cùng gay gắt trong văn phòng giám đốc. Cuối cùng, Giám đốc Cường đưa ra một thời hạn chót không thể thương lượng: năm ngày. Nếu trong năm ngày tới nhóm của Giáo sư Đài không đưa ra được bản dịch đầy đủ hoặc bằng chứng cụ thể hơn về bản chất tín hiệu, ông sẽ đơn phương báo cáo sự việc lên cấp trên và tổ chức họp báo. Áp lực thời gian nặng nề bắt đầu đè nặng lên vai Giáo sư Đài và các cộng sự trẻ.\\n\\nÔng Cường đứng dậy, cài lại cúc áo vest rồi bước lại gần cửa sổ nhìn ra khoảng sân rộng của đài quan sát. Ông hạ giọng, nhắc nhở Giáo sư Đài rằng ngân sách duy trì đài Mây Trắng trong những năm qua liên tục bị cắt giảm vì thiếu các công trình công bố quốc tế ấn tượng. Nếu không có phát hiện chấn động này để làm đòn bẩy xin kinh phí mới từ Bộ Khoa học, đài Mây Trắng rất có thể sẽ phải đóng cửa hoặc sáp nhập vào một đơn vị khác sau khi Giáo sư Đài nghỉ hưu. Đó là thực tế phũ phàng của bài toán quản lý mà một nhà khoa học thuần túy như ông Đài thường bỏ qua.\\n\\nGiáo sư Đài lặng người trước lời nhắc nhở thẳng thắn của Giám đốc Cường. Ông hiểu rõ khó khăn tài chính mà đài đang phải đối mặt, nhưng bản năng của một người gắn bó cả đời với khoa học chân chính không cho phép ông đem một bí mật thiêng liêng của vũ trụ ra làm công cụ thương mại hay truyền thông khi nó chưa được thấu hiểu trọn vẹn. Sau khi Giám đốc Cường rời đi, không khí trong phòng làm việc trở nên vô cùng căng thẳng. Tú Anh, Bảo và Diệp nhìn Giáo sư Đài với ánh mắt lo âu, sẵn sàng tuân theo mọi quyết định của ông.",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Áp lực công bố",
+            "text": "Giám đốc Cường muốn họp báo công bố phát hiện để thu hút ngân sách và nâng cao uy tín cho Viện."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Thái độ phản đối của Giáo sư Đài",
+            "text": "Giáo sư Đài yêu cầu giữ bí mật để thẩm tra kỹ lưỡng, tránh gây hoảng loạn công chúng."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Thời hạn năm ngày",
+            "text": "Giám đốc Cường ra tối hậu thư năm ngày cho nhóm nghiên cứu để hoàn tất bản giải mã."
+          }
+        ]
+      },
+      {
+        "chapterNo": 5,
+        "title": "Nhật ký bốn mươi năm trước",
+        "content": "Đêm hôm đó, khi ngọn đèn dầu trong căn phòng làm việc riêng của Giáo sư Đài tỏa ra ánh sáng vàng ấm áp giữa tiếng gió núi rít qua khe cửa, ông dẫn Tú Anh vào góc tủ tài liệu cũ. Ông lấy ra từ tủ khóa sắt một quyển nhật ký bìa nâu đã sờn rách các góc, mở ra trang giấy hoen ố ghi ngày 15 tháng 10 năm 1986. Bằng giọng trầm buồn chầm chậm, ông bắt đầu kể cho cô nghe về bí mật lớn nhất cuộc đời mình mà ông đã chôn giấu suốt bốn mươi năm.\\n\\nVào mùa thu năm 1986, khi còn là một kỹ sư trẻ tràn đầy nhiệt huyết nhưng cũng đầy liều lĩnh tại trạm phát vô tuyến cũ, Giáo sư Đài đã lén điều chỉnh hệ thống phát sóng công suất lớn của trạm trong một đêm trực cô đơn. Ông đã gửi một thông điệp mã hóa đơn giản ra không gian bao la. Thông điệp ấy gồm cấu trúc toán học cơ bản, bản đồ tọa độ Trái Đất và một giai điệu âm thanh dân ca đơn sơ, được định hướng chính xác về phía chòm sao Thiên Nga. Việc làm này hoàn toàn trái quy định an ninh viễn thông và không hề được sự cho phép của bất kỳ cấp lãnh đạo nào.\\n\\n\"Tôi đã gửi nó đi và tin rằng nó sẽ vô vọng biến mất trong khoảng không vô tận của vũ trụ,\" Giáo sư Đài nghẹn ngào nói, đôi mắt ông rấn nước dưới ánh đèn. \"Nhưng chu kỳ 77 phút... con số đó không phải là một khoảng cách ngẫu nhiên. Nếu tính theo tốc độ ánh sáng và khoảng cách khứ hồi từ Trái Đất đến điểm phản hồi gần nhất trong đám mây sao Thiên Nga, đúng bốn mươi năm chính là khoảng thời gian vừa đủ để bức thư của tôi đi và câu trả lời quay trở lại Trái Đất.\"\\n\\nTú Anh bàng hoàng nhận ra sự thật chấn động. Tín hiệu kỳ lạ mà họ bắt được lúc ba giờ sáng không phải là một tiếng kêu tình cờ từ một nền văn minh xa lạ, mà là lời hồi đáp dành riêng cho bức thư phát đi từ bốn thập kỷ trước của chính người thầy đang đứng trước mặt cô. Nhưng câu hỏi lớn nhất vẫn còn bỏ ngỏ: tại sao thông điệp quay trở lại lại lặp lại mỗi 77 phút với những biên độ bị biến đổi, và thực thể ngoài kia đã thêm vào những gì trong bức thư năm xưa?\\n\\nGiáo sư Đài lật mở từng trang nhật ký ố vàng, chỉ cho Tú Anh xem những dòng ghi chú tỉ mỉ về tần số, công suất phát sóng và cấu trúc mã nhị phân mà ông đã tự tay lập trình vào đêm mùa thu năm 1986. Đêm đó, dưới bầu trời sao rực rỡ của thời tuổi trẻ, ông đã liều lĩnh bấm nút phát sóng với niềm tin ngây thơ rằng con người không cô độc giữa không gian bao la. Khi hành động ấy bị phát hiện, ông đã phải nhận một án kỷ luật nặng nề và bị điều chuyển công tác lên đỉnh Mây Trắng hẻo lánh này.\\n\\nTú Anh nhìn ngọn đèn dầu chao ơ trước gió, lòng cô dâng lên một nỗi niềm kính phục và xúc động sâu sắc. Người thầy già trước mặt cô không chỉ là một nhà thiên văn học tận tụy, mà còn là một người tiên phong đã dũng cảm cất tiếng nói đầu tiên của nhân loại vào khoảng không vô tận từ bốn mươi năm trước. Cô nhận ra rằng chu kỳ 77 phút không đơn thuần là một chỉ số tần số, mà là nhịp đập thời gian nối liền tuổi trẻ nhiệt huyết của thầy Đài với thế hệ nghiên cứu trẻ của cô hôm nay.",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Bí mật năm 1986",
+            "text": "Năm 1986, Giáo sư Đài từng lén phát một thông điệp mã hóa ra vũ trụ hướng về chòm sao Thiên Nga."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Thời gian khứ hồi",
+            "text": "Khoảng thời gian bốn mươi năm trùng khớp hoàn toàn với hành trình khứ hồi của sóng vô tuyến."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Sự thật về tín hiệu",
+            "text": "Tín hiệu 77 phút chính là lời phản hồi cho bức thư phát đi từ bốn thập kỷ trước của Giáo sư Đài."
+          }
+        ]
+      },
+      {
+        "chapterNo": 6,
+        "title": "Bản dịch của hai thế hệ",
+        "content": "Dựa trên những tiết lộ quý giá của Giáo sư Đài về cấu trúc thuật toán mã hóa năm 1986, Diệp và Tú Anh bắt tay vào một chiến dịch giải mã xuyên đêm. Họ tiến hành chồng ghép hai tập dữ liệu: bản mã gốc năm 1986 do Giáo sư Đài lưu giữ trong nhật ký và chuỗi tín hiệu nhị phân thu được ở hiện tại. Khi sử dụng thuật toán trừ phổ tần số nâng cao, phần dữ liệu thừa ra chính là toàn bộ nội dung mới đã được thực thể ngoài không gian chỉnh sửa và bổ sung.\\n\\nBản dịch dần hiển thị lên màn hình dưới dạng những ký hiệu hình học phức tạp và các mã nhị phân sóng đôi. Phần đầu tiên của tín hiệu tái hiện lại chính xác bản đồ hệ Mặt Trời và chuỗi toán học mà Giáo sư Đài từng gửi đi – một sự xác nhận nhã nhặn rằng \"chúng tôi đã nhận được thông điệp của bạn\". Tuy nhiên, phần thứ hai đã được mở rộng thêm một lượng dữ liệu khổng lồ chứa các phương trình vật lý lý thuyết vượt xa tầm hiểu biết hiện tại của nhân loại, giải quyết các bế tắc về năng lượng tối và thuyết hấp dẫn lượng tử.\\n\\nĐặc biệt, ở đoạn cuối của bản dịch có một chuỗi mã hóa thời gian đếm lùi tinh vi. Diệp tính toán các đại số tích phân và bàng hoàng phát hiện ra rằng chuỗi đếm lùi này trỏ thẳng đến một mốc thời gian trong tương lai gần – khoảng ba mươi năm nữa, khi điểm hội tụ quỹ đạo giữa hai hệ sao đạt vị trí tối ưu tuyệt đối cho việc truyền tải dữ liệu mật độ cao. Đoạn tin nhắn không thể giải mã trọn vẹn ngay hôm nay, vì câu trả lời đầy đủ đòi hỏi sự phát triển tri thức của thế hệ tiếp theo.\\n\\n\"Người nhận được câu trả lời cuối cùng không phải là tôi,\" Giáo sư Đài mím môi m cười nhẹ nhõm khi nhìn vào dòng mã thời gian rực sáng. Bốn mươi năm trước ông đã gieo một hạt giống liều lĩnh vào khoảng không, và giờ đây, quả ngọt tri thức của nó đang thuộc về thế hệ của Tú Anh, Bảo và Diệp. Tín hiệu bị chỉnh sửa chính là chiếc cầu nối kỳ diệu nối liền quá khứ, hiện tại và tương lai của nhân loại.\\n\\nDiệp liên tục thực hiện các phép kiểm tra chéo trên máy tính để đảm bảo không có bất kỳ sai số nào trong phép tính đếm lùi thời gian. Kết quả vẫn nhất quán: mốc thời gian hội tụ quỹ đạo được ấn định vào chính xác ngày 15 tháng 10 năm 2056. Điều này có nghĩa là nền văn minh ở chòm sao Thiên Nga đã chủ động thiết lập một lộ trình giao tiếp dài hạn với Trái Đất, trao cho nhân loại một khoảng thời gian chuẩn bị tinh thần và tri thức trước khi cuộc đối thoại quy mô lớn thực sự bắt đầu.\\n\\nBảo và Tú Anh đứng nhìn màn hình mô phỏng quỹ đạo hai hệ sao đang từ từ tiến lại gần nhau trong không gian ba chiều. Họ cảm nhận được một luồng sinh khí mới đang chảy trong huyết quản. Nhiệm vụ của nhóm không còn dừng lại ở việc phát hiện một tín hiệu lạ, mà là xây dựng một nền móng khoa học và kỹ thuật vững chắc cho thế hệ tiếp nối. Câu trả lời của vũ trụ không phải là một mối đe dọa, mà là một lời mời gọi nhân loại cùng trưởng thành.",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Chồng ghép dữ liệu",
+            "text": "Nhóm nghiên cứu dùng thuật toán trừ phổ tần để tách phần nội dung được bổ sung trong tín hiệu."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Nội dung chỉnh sửa",
+            "text": "Tín hiệu xác nhận bản gốc năm 1986 và bổ sung các phương trình vật lý lý thuyết tiên tiến."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Thông điệp cho tương lai",
+            "text": "Mã thời gian đếm lùi cho thấy câu trả lời đầy đủ sẽ được truyền tới thế hệ tiếp nối trong tương lai."
+          }
+        ]
+      },
+      {
+        "chapterNo": 7,
+        "title": "Lời hồi đáp cho tương lai",
+        "content": "Vào ngày cuối cùng trước khi Giáo sư Đài chính thức nhận quyết định nghỉ hưu và rời đài Mây Trắng, một cuộc họp nội bộ đặc biệt được tổ chức với sự tham dự của Giám đốc Cường. Sau khi nghe trình bày toàn bộ bản giải mã đối soát và bằng chứng về chuỗi đếm lùi hướng tới tương lai, Giám đốc Cường hoàn toàn bị thuyết phục bởi tầm vóc tri thức và sự cẩn trọng của nhóm. Ông quyết định hủy bỏ kế hoạch họp báo hấp tấp, thay vào đó phê duyệt một dự án nghiên cứu mật dài hạn mang tên \"Mây Trắng 86\".\\n\\nBuổi chiều hôm đó, ánh nắng vàng nhạt tuyệt đẹp phủ lên mâm chảo ăngten khổng lồ đang lặng lẽ hướng về bầu trời. Giáo sư Đài đứng trên đồi quan sát, làn gió núi thổi tung mái tóc bạc. Ông chậm rãi trao lại cuốn sổ nhật ký bìa nâu năm 1986 cho Tú Anh. Cô sẽ chính thức tiếp quản vị trí trưởng nhóm nghiên cứu tín hiệu vô tuyến, cùng với sự hỗ trợ vững chắc của Bảo ở mảng kỹ thuật ăngten và Diệp ở mảng giải mã toán học. Nhóm nhà khoa học trẻ đã sẵn sàng cho một sứ mệnh kéo dài nhiều thập kỷ phía trước.\\n\\nĐúng ba giờ mười lăm phút chiều, tín hiệu 77 phút lại vang lên trên hệ thống kiểm âm của đài. Âm thanh tần số chuyển đổi nghe như tiếng nhịp đập êm ái từ trái tim của vũ trụ. Giáo sư Đài mỉm cười nhìn các học trò của mình đang thuần thục và tự tin thao tác trên bàn điều khiển. Ông biết rằng sự nghiệp chuyên môn của cá nhân ông kết thúc ở đây, nhưng hành trình khám phá và đối thoại của nhân loại với vũ trụ thì chỉ mới bắt đầu.\\n\\nÔng chậm rãi bước ra khỏi phòng điều hành, để lại sau lưng những màn hình máy tính rực sáng và tiếng xì xào thảo luận sôi nổi đầy sức sống của thế hệ trẻ. Trên bầu trời trong xanh của đỉnh Mây Trắng, chòm sao Thiên Nga đang từ từ hiện lên khi mây chiều tan bớt. Vũ trụ đã cất lời hồi đáp, và lời đáp ấy đang nằm an toàn trong tay những người sẽ đi tiếp con đường của tương lai.\\n\\nBước chân Giáo sư Đài chầm chậm đi xuống con đường dốc dẫn về căn nhà công vụ dưới chân đồi. Làn gió thu mang theo mùi hương của cỏ dại và tiếng lá cây rì rào trong nắng chiều. Ông dừng lại một chút, ngoảnh đầu nhìn lên mâm chảo ăngten khổng lồ đang phản chiếu ánh mặt trời rực rỡ trên đỉnh núi. Bốn mươi năm cống hiến thầm lặng của ông đã tìm thấy một cái kết không thể tuyệt vời hơn.\\n\\nTrong căn phòng điều hành phía trên cao, Tú Anh, Bảo và Diệp vẫn đang tập trung cao độ trước bàn máy. Họ cẩn thận ghi chép từng chỉ số biên độ của xung sóng vừa nhận được, chuẩn bị cho những bước đi đầu tiên của Dự án Mây Trắng 86. Trên bảng ghi chú chính của phòng máy, dòng chữ do chính tay Giáo sư Đài viết trước khi rời đi vẫn còn nguyên vẹn: 'Vũ trụ không bao giờ im lặng trước những tâm hồn kiên trì tìm kiếm sự thật.'",
+        "sections": [
+          {
+            "sectionNo": 1,
+            "heading": "Dự án Mây Trắng 86",
+            "text": "Giám đốc Cường hủy kế hoạch họp báo, phê duyệt dự án nghiên cứu dài hạn mang tên Mây Trắng 86."
+          },
+          {
+            "sectionNo": 2,
+            "heading": "Bàn giao thế hệ",
+            "text": "Giáo sư Đài trao lại nhật ký và quyền dẫn dắt nhóm nghiên cứu cho Tú Anh, Bảo và Diệp."
+          },
+          {
+            "sectionNo": 3,
+            "heading": "Hành trình mở ra",
+            "text": "Giáo sư Đài yên tâm nghỉ hưu, tin tưởng vào thế hệ tương lai sẽ tiếp tục sứ mệnh giải mã vũ trụ."
+          }
+        ]
+      }
+    ]
+  }
+]
