@@ -3,15 +3,18 @@ import { CatalogPage } from './features/catalog/CatalogPage'
 import { IdentityPage } from './features/identity/IdentityPage'
 import { RankingPage } from './features/ranking/RankingPage'
 import { ReadingPage } from './features/reading/ReadingPage'
+import { SuggestionsPage } from './features/suggestions/SuggestionsPage'
+import { AdminSuggestionsPage } from './features/suggestions/AdminSuggestionsPage'
 import { AuthProvider } from './shared/AuthProvider'
 import { useAuth } from './shared/auth-context'
 import { HealthBadge } from './shared/HealthBadge'
 
 const pages = [
-  { id: 'catalog', label: 'Kho sách', icon: 'collections_bookmark', component: CatalogPage },
-  { id: 'reading', label: 'Đọc sách', icon: 'auto_stories', component: ReadingPage },
-  { id: 'ranking', label: 'Thịnh hành', icon: 'trending_up', component: RankingPage },
-  { id: 'identity', label: 'Tài khoản', icon: 'account_circle', component: IdentityPage },
+  { id: 'catalog', label: 'Kho sách', icon: 'collections_bookmark' },
+  { id: 'reading', label: 'Đọc sách', icon: 'auto_stories' },
+  { id: 'ranking', label: 'Thịnh hành', icon: 'trending_up' },
+  { id: 'suggestions', label: 'Đề xuất sách', icon: 'add_comment' },
+  { id: 'identity', label: 'Tài khoản', icon: 'account_circle' },
 ]
 
 function initialsOf(user) {
@@ -49,8 +52,30 @@ function UserBox({ onLogin }) {
 }
 
 function Shell() {
+  const { user, isAdmin } = useAuth()
   const [active, setActive] = useState('catalog')
-  const CurrentPage = pages.find((page) => page.id === active).component
+  // Sách đang mở trong E-Reader; các nút "Đọc sách" ở mọi trang đều đổi giá trị này.
+  const [readerBookId, setReaderBookId] = useState('')
+  // Sách cần mở sẵn trang chi tiết khi chuyển sang Kho sách từ trang khác; null = mở danh sách.
+  const [detailBookId, setDetailBookId] = useState(null)
+
+  function openReader(bookId) {
+    setReaderBookId(bookId)
+    setActive('reading')
+    window.scrollTo({ top: 0 })
+  }
+
+  function openDetail(bookId) {
+    setDetailBookId(bookId)
+    setActive('catalog')
+    window.scrollTo({ top: 0 })
+  }
+
+  function openTab(id) {
+    // Bấm thanh điều hướng thì Kho sách luôn về danh sách, không mở lại chi tiết cũ
+    if (id === 'catalog') setDetailBookId(null)
+    setActive(id)
+  }
 
   return (
     <div className="app-shell">
@@ -72,12 +97,12 @@ function Shell() {
             </div>
           </header>
           <nav className="site-nav" aria-label="Chức năng chính">
-            {pages.map((page) => (
+            {[...pages, ...(isAdmin ? [{ id: 'admin-suggestions', label: 'Quản lý đề xuất', icon: 'forum' }] : [])].map((page) => (
               <button
                 key={page.id}
                 type="button"
                 className={active === page.id ? 'active' : ''}
-                onClick={() => setActive(page.id)}
+                onClick={() => openTab(page.id)}
                 aria-current={active === page.id ? 'page' : undefined}
               >
                 <span className="icon sm" aria-hidden="true">{page.icon}</span>
@@ -87,7 +112,21 @@ function Shell() {
           </nav>
         </div>
       </div>
-      <main className="app-body"><CurrentPage /></main>
+      <main className="app-body">
+        {active === 'catalog' && <CatalogPage onRead={openReader} initialBookId={detailBookId} />}
+        {active === 'reading' && (
+          <ReadingPage
+            bookId={readerBookId}
+            onRead={openReader}
+            onDetail={openDetail}
+            onBrowse={() => openTab('catalog')}
+          />
+        )}
+        {active === 'ranking' && <RankingPage onRead={openReader} onDetail={openDetail} />}
+        {active === 'identity' && <IdentityPage />}
+        {active === 'suggestions' && <SuggestionsPage key={user?.id ?? 'guest'} onLogin={() => openTab('identity')} />}
+        {active === 'admin-suggestions' && <AdminSuggestionsPage key={user?.id ?? 'guest'} />}
+      </main>
       <footer className="site-footer">
         Đồ án môn NoSQL · Polyglot Persistence (MongoDB + Redis)
       </footer>

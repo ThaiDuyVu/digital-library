@@ -53,15 +53,3 @@ export function BookCover({ book, className = '' }) {
     </div>
   )
 }
-
-/** Bìa nhỏ dùng trong bảng xếp hạng. */
-export function MiniCover({ book }) {
-  const [failed, setFailed] = useState(false)
-  return (
-    <span className="cover-mini" style={{ '--cover': colorFor(book) }} aria-hidden="true">
-      {book.coverUrl && !failed
-        ? <img src={book.coverUrl} alt="" loading="lazy" onError={() => setFailed(true)} />
-        : initialOf(book)}
-    </span>
-  )
-}

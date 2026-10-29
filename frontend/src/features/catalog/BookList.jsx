@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiGet } from '../../shared/api'
-import { BookCover } from './BookCover'
+import { BookCard } from './BookCard'
 
 const PAGE_SIZE = 12
 
@@ -17,7 +17,7 @@ function pageNumbers(current, total) {
   return out
 }
 
-export function BookList({ onSelect }) {
+export function BookList({ onSelect, onRead }) {
   const [categories, setCategories] = useState([])
   const [draft, setDraft] = useState('')
   const [filters, setFilters] = useState({ q: '', category: '', page: 0 })
@@ -122,27 +122,7 @@ export function BookList({ onSelect }) {
 
       <div className={`book-grid ${loading ? 'dimmed' : ''}`}>
         {books.map((book) => (
-          <button
-            key={book.id}
-            type="button"
-            className="book-card"
-            onClick={() => onSelect(book.id)}
-          >
-            <BookCover book={book} />
-            <div className="book-card-body">
-              <strong className="book-title">{book.title}</strong>
-              <span className="book-author">{book.author}</span>
-              <div className="chips">
-                {book.categories.slice(0, 2).map((name) => (
-                  <span key={name} className="chip">{name}</span>
-                ))}
-              </div>
-              <span className="book-card-foot">
-                {book.chapterCount} chương
-                <span className="icon" aria-hidden="true">arrow_forward</span>
-              </span>
-            </div>
-          </button>
+          <BookCard key={book.id} book={book} onSelect={onSelect} onRead={onRead} />
         ))}
       </div>
 

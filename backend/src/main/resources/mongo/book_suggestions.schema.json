@@ -1,0 +1,16 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "title": "book_suggestions",
+    "required": ["_id", "username", "description", "createdAt"],
+    "properties": {
+      "_id": { "bsonType": "objectId" },
+      "username": { "bsonType": "string" },
+      "description": { "bsonType": "string", "minLength": 1, "maxLength": 1000 },
+      "createdAt": { "bsonType": "date" },
+      "reply": { "bsonType": "string", "minLength": 1, "maxLength": 2000 },
+      "repliedAt": { "bsonType": "date" },
+      "repliedBy": { "bsonType": "string" }
+    }
+  }
+}

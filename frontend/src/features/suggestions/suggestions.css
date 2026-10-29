@@ -1,0 +1,49 @@
+.suggestion-hero { position: relative; overflow: hidden; }
+.suggestion-hero::after { content: '✦'; position: absolute; right: 36px; top: 10px; font-size: 120px; line-height: 1; color: var(--primary); opacity: .08; pointer-events: none; }
+.suggestions-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.suggestions-grid > * { min-width: 0; }
+.suggestion-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.suggestion-section-head h3 { margin: 0; font-size: 1.125rem; }
+.suggestion-section-head + p { margin: 8px 0 20px; }
+.suggestion-quota { border-radius: 999px; background: var(--primary-tint); color: var(--primary-deep); padding: 4px 10px; font-size: .75rem; font-weight: 600; }
+.suggestion-field-note { display: flex; align-items: start; gap: 16px; color: var(--muted); font-size: .75rem; line-height: 1.6; }
+.suggestion-field-note > :last-child { margin-left: auto; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.suggestion-compose .suggestion-limit { display: flex; align-items: start; gap: 8px; margin: 0; color: var(--muted); font-size: .8125rem; }
+.suggestion-limit .icon { margin-top: 3px; }
+.suggestion-compose textarea:disabled { background: var(--canvas); color: var(--muted); cursor: not-allowed; }
+.suggestion-vip { display: flex; align-items: start; gap: 12px; margin-top: 24px; padding: 18px; border: 1px dashed var(--gold); border-radius: var(--radius-lg); background: var(--gold-bg); }
+.suggestion-vip-icon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; background: var(--gold); border-radius: 12px; color: var(--gold-ink); font-size: 24px; transform: rotate(-8deg); }
+.suggestion-vip > div { min-width: 0; }
+.suggestion-vip h4 { margin: 0 0 6px; font-size: .9375rem; }
+.suggestion-vip p { font-size: .8125rem; margin: 0 0 12px; }
+.suggestion-vip-btn { background: var(--gold); color: var(--ink); border-color: var(--gold); text-align: left; font-size: .8125rem; }
+.suggestion-vip-btn:hover:not(:disabled) { background: var(--gold-bg); border-color: var(--gold-ink); }
+.suggestion-vip .suggestion-vip-note { margin: 12px 0 0; color: var(--gold-ink); }
+.suggestion-card { min-width: 0; padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+.suggestion-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.suggestion-card time { font-size: .75rem; color: var(--muted); }
+.suggestion-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; background: var(--gold-bg); color: var(--gold-ink); }
+.suggestion-status.replied { color: var(--primary-deep); background: var(--primary-tint); }
+.suggestion-card .suggestion-description, .suggestion-reply p { color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.suggestion-description { margin: 16px 0; }
+.suggestion-reply { margin: 16px 0; padding: 16px; border-left: 3px solid var(--primary); border-radius: 0 var(--radius) var(--radius) 0; background: var(--primary-tint-2); }
+.suggestion-reply h4 { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--primary-deep); font-size: .8125rem; }
+.suggestion-reply p { margin: 8px 0 12px; font-size: .875rem; }
+.suggestion-empty { padding: 40px 20px; text-align: center; }
+.suggestion-empty > .icon { font-size: 40px; color: var(--primary); opacity: .6; }
+.suggestion-empty h3, .suggestion-empty h4 { margin: 12px 0 8px; }
+.suggestion-empty p { color: var(--muted); font-size: .875rem; max-width: 380px; margin: 8px auto 20px; }
+.suggestion-admin-toolbar, .suggestion-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.suggestion-admin-toolbar { justify-content: space-between; gap: 16px; }
+.suggestion-admin-list { display: grid; gap: 16px; }
+.suggestion-user { display: flex; align-items: center; gap: 6px; margin: 16px 0 0; font-size: .875rem; overflow-wrap: anywhere; }
+.suggestion-reply-form { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-soft); }
+@media (max-width: 900px) {
+  .suggestions-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 480px) {
+  .suggestion-card { padding: 14px; }
+  .suggestion-vip { padding: 14px; }
+  .suggestion-vip-icon { display: none; }
+  .suggestion-hero::after { right: 12px; }
+}

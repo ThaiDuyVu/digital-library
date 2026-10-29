@@ -3,6 +3,10 @@ import { ApiError, apiGet, apiPost, apiPut } from '../../shared/api'
 import { useAuth } from '../../shared/auth-context'
 import { useSaveOnExit } from './useSaveOnExit'
 import { TopBooksWidget } from '../ranking/TopBooksWidget'
+import { RelatedBooks } from '../catalog/RelatedBooks'
+import { ChapterTimeline } from './ChapterTimeline'
+import { ConfirmDialog } from './ConfirmDialog'
+import { HandsFreeReader } from './HandsFreeReader'
 
 // Số ký tự tối đa mỗi trang. Backend không giới hạn page vì cách chia trang thuộc frontend.
 const PAGE_CHARS = 1600
@@ -83,23 +87,29 @@ function paginateBook(chapters) {
   return pages
 }
 
-export function ReadingPage() {
+/** "chương 2" hoặc "các chương 2–4" cho câu thông báo nhảy chương. */
+function describeSkipped(skipped) {
+  if (skipped.length === 1) return `chương ${skipped[0].chapterNo}`
+  return `các chương ${skipped[0].chapterNo}–${skipped[skipped.length - 1].chapterNo}`
+}
+
+/**
+ * bookId do App giữ: mọi nút "Đọc sách" (Kho sách, Thịnh hành, Sách liên quan) đều gọi onRead,
+ * nên đổi tab rồi quay lại vẫn mở đúng cuốn đang đọc. Trang đọc không có ô chọn sách riêng.
+ */
+export function ReadingPage({ bookId = '', onRead, onDetail, onBrowse }) {
   const { user, loading: authLoading } = useAuth()
   const userId = user?.id
 
-  // Danh sách sách để chọn
-  const [query, setQuery] = useState('')
-  const [books, setBooks] = useState([])
-  const [listError, setListError] = useState('')
-
   // Sách đang đọc và vị trí
-  const [bookId, setBookId] = useState('')
   const [book, setBook] = useState(null)
   const [pos, setPos] = useState(null) // { page, line } – page tính trên cả cuốn
   const [resumeNote, setResumeNote] = useState('')
   const [bookError, setBookError] = useState('')
   const [saveState, setSaveState] = useState('') // '' | 'saving' | 'saved' | 'error'
   const [fontSize, setFontSize] = useState(DEFAULT_FONT)
+  const [pendingJump, setPendingJump] = useState(null) // { chapter, kind, message } chờ xác nhận
+  const [handsFree, setHandsFree] = useState(false)     // chế độ đọc nghỉ tay
 
   const countedRef = useRef(null)   // "bookId:chapterNo" đã gọi /read, tránh tăng lặp khi render lại
   const inFlight = useRef(false)    // đang có một PUT tiến trình chạy
@@ -123,20 +133,7 @@ export function ReadingPage() {
 
   const { markSaved } = useSaveOnExit({ userId, bookId, pos, chapterNo })
 
-  // 1. Tải danh sách sách (tối đa 100 theo giới hạn của API), tìm kiếm theo từ khóa
-  const [search, setSearch] = useState('')
-  useEffect(() => {
-    if (!userId) return undefined
-    let active = true
-    const params = new URLSearchParams({ page: 0, size: 100 })
-    if (search) params.set('q', search)
-    apiGet(`/books?${params}`)
-      .then((data) => { if (active) { setBooks(data.content); setListError('') } })
-      .catch((err) => { if (active) setListError(err.message) })
-    return () => { active = false }
-  }, [userId, search])
-
-  // 2. Chọn sách: tải TOÀN VĂN cả cuốn (cần để đánh số trang liên tục) và tiến trình đã lưu
+  // 1. Mở sách: tải TOÀN VĂN cả cuốn (cần để đánh số trang liên tục) và tiến trình đã lưu
   useEffect(() => {
     countedRef.current = null
     pendingLine.current = null
@@ -145,6 +142,7 @@ export function ReadingPage() {
     setResumeNote('')
     setBookError('')
     setSaveState('')
+    setPendingJump(null)
     if (!bookId || !userId) return undefined
 
     let active = true
@@ -217,7 +215,7 @@ export function ReadingPage() {
     }
   }, [userId, bookId, markSaved])
 
-  // 3. Vị trí đã lưu vượt số trang có thật: ghi lại vị trí đã kéo về để lần sau mở đúng
+  // 2. Vị trí đã lưu vượt số trang có thật: ghi lại vị trí đã kéo về để lần sau mở đúng
   useEffect(() => {
     if (!pos || !chapterNo || totalPages === 0) return
     if (pos.page >= 1 && pos.page <= totalPages) return
@@ -225,7 +223,7 @@ export function ReadingPage() {
     setPos({ page, line: pos.line })
   }, [pos, page, chapterNo, totalPages, save])
 
-  // 4. Mở chương mới: tăng lượt đọc đúng một lần cho mỗi lần mở chương
+  // 3. Mở chương mới: tăng lượt đọc đúng một lần cho mỗi lần mở chương
   useEffect(() => {
     if (!bookId || chapterNo == null) return
     const key = `${bookId}:${chapterNo}`
@@ -234,7 +232,7 @@ export function ReadingPage() {
     apiPost(`/books/${bookId}/read?chapterNo=${chapterNo}`).catch(() => {}) // lỗi đếm lượt không chặn việc đọc
   }, [bookId, chapterNo])
 
-  // 5. Sau khi trang đã render, cuộn tới đúng dòng đã lưu (một lần cho mỗi lần khôi phục)
+  // 4. Sau khi trang đã render, cuộn tới đúng dòng đã lưu (một lần cho mỗi lần khôi phục)
   useEffect(() => {
     if (pendingLine.current == null || !currentPage) return
     const line = pendingLine.current
@@ -249,7 +247,7 @@ export function ReadingPage() {
     return () => cancelAnimationFrame(frame)
   }, [currentPage, lineHeight])
 
-  // 6. Theo dõi dòng đang đọc: số dòng văn bản đã trôi qua mép trên vùng đọc
+  // 5. Theo dõi dòng đang đọc: số dòng văn bản đã trôi qua mép trên vùng đọc
   useEffect(() => {
     if (!currentPage) return undefined
     function onScroll() {
@@ -273,15 +271,77 @@ export function ReadingPage() {
     save(nextPage, 0, pages[nextPage - 1].chapterNo)
   }
 
+  /**
+   * Chế độ đọc nghỉ tay báo trang đang ở mép trên khung nhìn. Lưu vị trí như lật trang thường,
+   * nhưng không cuộn vùng đọc phía sau (nó đang bị che). Đổi chương thì effect đếm lượt tự chạy.
+   */
+  const handsFreePage = useCallback((nextPage) => {
+    pendingLine.current = null
+    setPos({ page: nextPage, line: 0 })
+    save(nextPage, 0, pages[nextPage - 1].chapterNo)
+  }, [pages, save])
+
+  const exitHandsFree = useCallback(() => {
+    setHandsFree(false)
+    setResumeNote('Đã thoát chế độ đọc nghỉ tay, vị trí đọc đã được lưu.')
+    requestAnimationFrame(() => articleRef.current?.scrollIntoView({ block: 'start' }))
+  }, [])
+
   /** Trang đầu tiên của một chương trong cách đánh số liên tục. */
   function firstPageOf(targetChapterNo) {
     const index = pages?.findIndex((p) => p.chapterNo === targetChapterNo) ?? -1
     return index < 0 ? null : index + 1
   }
 
-  function handleSearch(event) {
-    event.preventDefault()
-    setSearch(query.trim())
+  /** Chuyển hẳn sang chương đã chọn và báo cho người đọc biết vừa nhảy tới đâu. */
+  function openChapter(target, note) {
+    const targetPage = firstPageOf(target.chapterNo)
+    if (!targetPage) return
+    go(targetPage)
+    setResumeNote(note)
+  }
+
+  /**
+   * Chọn chương trên cây mốc. Lùi về chương đã qua hoặc nhảy cóc qua chương chưa đọc thì hỏi lại,
+   * vì một cú bấm nhầm sẽ ghi đè vị trí đã lưu trong Redis. Sang đúng chương kế tiếp thì đi luôn.
+   */
+  function pickChapter(target) {
+    const chapters = book?.chapters ?? []
+    const from = chapters.findIndex((c) => c.chapterNo === chapterNo)
+    const to = chapters.findIndex((c) => c.chapterNo === target.chapterNo)
+    if (from < 0 || to < 0 || to === from) return
+
+    if (to < from) {
+      setPendingJump({
+        chapter: target,
+        kind: 'back',
+        message: `Có vẻ như chương ${target.chapterNo} bạn đã đọc qua rồi bạn có chắc chắn muốn quay lại ?`,
+      })
+    } else if (to > from + 1) {
+      const skipped = chapters.slice(from + 1, to)
+      setPendingJump({
+        chapter: target,
+        kind: 'skip',
+        skipped,
+        message: `Bạn đang ở chương ${chapterNo}. Chuyển tới chương ${target.chapterNo} sẽ bỏ qua `
+          + `${describeSkipped(skipped)} chưa đọc. Bạn có chắc chắn muốn nhảy tới ?`,
+      })
+    } else {
+      openChapter(target, `Đã chuyển sang chương ${target.chapterNo}: ${target.title}.`)
+    }
+  }
+
+  function confirmJump() {
+    const { chapter, kind, skipped } = pendingJump
+    setPendingJump(null)
+    openChapter(chapter, kind === 'back'
+      ? `Đã quay lại chương ${chapter.chapterNo}: ${chapter.title}.`
+      : `Đã nhảy tới chương ${chapter.chapterNo}: ${chapter.title} (bỏ qua ${describeSkipped(skipped)}).`)
+  }
+
+  function cancelJump() {
+    setPendingJump(null)
+    setResumeNote(`Đã hủy, bạn vẫn đang ở chương ${chapterNo}.`)
   }
 
   if (authLoading) {
@@ -311,51 +371,9 @@ export function ReadingPage() {
 
       <div className="reader-layout">
         <div className="reader-main">
-          <div className="toolbar-card" style={{ marginBottom: 0 }}>
-            <form className="reader-controls" onSubmit={handleSearch}>
-              <div className="reader-search">
-                <label className="input-icon">
-                  <span className="icon" aria-hidden="true">search</span>
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Tìm theo tên sách hoặc tác giả…"
-                    aria-label="Tìm sách để đọc"
-                  />
-                </label>
-                <button type="submit" className="btn">Tìm</button>
-              </div>
-              <select
-                className="select"
-                value={bookId}
-                onChange={(e) => setBookId(e.target.value)}
-                aria-label="Chọn sách"
-              >
-                <option value="">Chọn sách để đọc…</option>
-                {books.map((b) => (
-                  <option key={b.id} value={b.id}>{b.title} – {b.author}</option>
-                ))}
-              </select>
-            </form>
-
-            {book && pos && chapterNo != null && (
-              <div className="reader-controls" style={{ marginTop: 10 }}>
-                <select
-                  className="select"
-                  value={chapterNo}
-                  onChange={(e) => {
-                    const target = firstPageOf(Number(e.target.value))
-                    if (target) go(target)
-                  }}
-                  aria-label="Chọn chương"
-                >
-                  {chapters.map((c) => (
-                    <option key={c.chapterNo} value={c.chapterNo}>
-                      Chương {c.chapterNo}: {c.title}
-                    </option>
-                  ))}
-                </select>
+          {book && pos && chapterNo != null && (
+            <div className="toolbar-card" style={{ marginBottom: 0 }}>
+              <div className="reader-controls reader-tools">
                 <label className="input-icon reader-jump">
                   <span className="icon" aria-hidden="true">input</span>
                   <input
@@ -367,29 +385,32 @@ export function ReadingPage() {
                     aria-label="Nhảy tới trang"
                   />
                 </label>
-                <div className="size-group" role="group" aria-label="Cỡ chữ">
-                  <button
-                    type="button"
-                    aria-label="Giảm cỡ chữ"
-                    disabled={fontSize <= MIN_FONT}
-                    onClick={() => setFontSize((size) => Math.max(MIN_FONT, size - 1))}
-                  >
-                    A-
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Tăng cỡ chữ"
-                    disabled={fontSize >= MAX_FONT}
-                    onClick={() => setFontSize((size) => Math.min(MAX_FONT, size + 1))}
-                  >
-                    A+
-                  </button>
+                <div className="reader-tools-right">
+                  <div className="size-group" role="group" aria-label="Cỡ chữ">
+                    <button
+                      type="button"
+                      aria-label="Giảm cỡ chữ"
+                      disabled={fontSize <= MIN_FONT}
+                      onClick={() => setFontSize((size) => Math.max(MIN_FONT, size - 1))}
+                    >
+                      A-
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Tăng cỡ chữ"
+                      disabled={fontSize >= MAX_FONT}
+                      onClick={() => setFontSize((size) => Math.min(MAX_FONT, size + 1))}
+                    >
+                      A+
+                    </button>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {listError && <p className="error-text" role="alert" style={{ margin: 0 }}>{listError}</p>}
+              <ChapterTimeline chapters={chapters} current={chapterNo} onPick={pickChapter} />
+            </div>
+          )}
+
           {bookError && <p className="error-text" role="alert" style={{ margin: 0 }}>{bookError}</p>}
 
           {resumeNote && (
@@ -400,12 +421,17 @@ export function ReadingPage() {
           )}
 
           <div ref={articleRef} className="reader-card" style={{ scrollMarginTop: 150 }}>
-            {!bookId && !listError && (
+            {!bookId && (
               <div className="reader-empty">
                 <span className="icon" aria-hidden="true">menu_book</span>
                 <p className="muted">
-                  Chọn một cuốn sách. Nếu bạn đã đọc dở, trang sẽ mở lại đúng vị trí đã lưu.
+                  Chưa mở cuốn sách nào. Bấm “Đọc sách” ở Kho sách hoặc Thịnh hành để bắt đầu;
+                  nếu bạn đã đọc dở, trang sẽ mở lại đúng vị trí đã lưu.
                 </p>
+                <button type="button" className="btn primary" onClick={onBrowse} style={{ marginTop: 16 }}>
+                  <span className="icon sm" aria-hidden="true">collections_bookmark</span>
+                  Đến Kho sách
+                </button>
               </div>
             )}
             {bookId && !book && !bookError && <p className="muted">Đang tải sách…</p>}
@@ -413,8 +439,18 @@ export function ReadingPage() {
             {book && currentPage && (
               <>
                 <div className="reader-head">
-                  {book.categories[0] && <span className="tag">{book.categories[0]}</span>}
+                  <div className="reader-head-top">
+                    {book.categories[0] ? <span className="tag">{book.categories[0]}</span> : <span />}
+                    <button type="button" className="btn primary small-btn" onClick={() => setHandsFree(true)}>
+                      <span className="icon sm" aria-hidden="true">play_circle</span>
+                      Đọc nghỉ tay
+                    </button>
+                  </div>
                   <h3 className="reader-book-title">{book.title}</h3>
+                  <button type="button" className="btn ghost small-btn reader-detail-link" onClick={() => onDetail(book.id)}>
+                    <span className="icon sm" aria-hidden="true">info</span>
+                    Xem chi tiết sách
+                  </button>
                   <p className="reader-meta">
                     <span>Tác giả: <strong>{book.author}</strong></span>
                     {book.categories.length > 0 && <span>Thể loại: {book.categories.join(', ')}</span>}
@@ -498,9 +534,32 @@ export function ReadingPage() {
         </div>
 
         <div className="reader-side">
-          <TopBooksWidget top={5} intervalMs={5000} currentBookId={bookId} />
+          <TopBooksWidget top={5} intervalMs={5000} currentBookId={bookId} onSelect={onDetail} onRead={onRead} />
         </div>
       </div>
+
+      {book && <RelatedBooks book={book} onSelect={onDetail} onRead={onRead} />}
+
+      {handsFree && pages && (
+        <HandsFreeReader
+          book={book}
+          pages={pages}
+          startPage={page}
+          fontSize={fontSize}
+          onPageChange={handsFreePage}
+          onExit={exitHandsFree}
+        />
+      )}
+
+      {pendingJump && (
+        <ConfirmDialog
+          title={pendingJump.kind === 'back' ? 'Quay lại chương cũ?' : 'Bỏ qua chương chưa đọc?'}
+          message={pendingJump.message}
+          confirmLabel={pendingJump.kind === 'back' ? 'Quay lại' : 'Nhảy tới'}
+          onConfirm={confirmJump}
+          onCancel={cancelJump}
+        />
+      )}
     </section>
   )
 }

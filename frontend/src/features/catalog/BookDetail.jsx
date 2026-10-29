@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiGet } from '../../shared/api'
 import { BookCover } from './BookCover'
+import { RelatedBooks } from './RelatedBooks'
 
 function ChapterReader({ bookId, chapterNo }) {
   const [chapter, setChapter] = useState(null)
@@ -33,7 +34,7 @@ function ChapterReader({ bookId, chapterNo }) {
   )
 }
 
-export function BookDetail({ bookId, onBack }) {
+export function BookDetail({ bookId, onBack, onRead, onSelect }) {
   const [book, setBook] = useState(null)
   const [error, setError] = useState('')
   const [openChapter, setOpenChapter] = useState(null)
@@ -51,10 +52,18 @@ export function BookDetail({ bookId, onBack }) {
 
   return (
     <section className="panel">
-      <button type="button" className="btn" onClick={onBack}>
-        <span className="icon sm" aria-hidden="true">arrow_back</span>
-        Về kho sách
-      </button>
+      <div className="detail-actions">
+        <button type="button" className="btn" onClick={onBack}>
+          <span className="icon sm" aria-hidden="true">arrow_back</span>
+          Về kho sách
+        </button>
+        {book && book.chapters.length > 0 && (
+          <button type="button" className="btn primary" onClick={() => onRead(book.id)}>
+            <span className="icon sm" aria-hidden="true">auto_stories</span>
+            Đọc sách
+          </button>
+        )}
+      </div>
 
       {error && <p className="error-text" role="alert">{error}</p>}
       {!book && !error && <p className="muted">Đang tải thông tin sách…</p>}
@@ -102,6 +111,8 @@ export function BookDetail({ bookId, onBack }) {
               </li>
             ))}
           </ol>
+
+          <RelatedBooks book={book} onSelect={onSelect} onRead={onRead} />
         </>
       )}
     </section>

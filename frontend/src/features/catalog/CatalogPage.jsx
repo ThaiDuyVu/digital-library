@@ -4,16 +4,18 @@ import { AdminPanel } from './AdminPanel'
 import { BookDetail } from './BookDetail'
 import { BookList } from './BookList'
 
-export function CatalogPage() {
+export function CatalogPage({ onRead, initialBookId = null }) {
   const { isAdmin } = useAuth()
-  const [view, setView] = useState('list') // list | detail | admin
-  const [bookId, setBookId] = useState(null)
+  // Mở thẳng trang chi tiết khi được gọi từ nút "Xem chi tiết" ở trang khác
+  const [view, setView] = useState(initialBookId ? 'detail' : 'list') // list | detail | admin
+  const [bookId, setBookId] = useState(initialBookId)
   // Tăng sau khi vào trang quản trị để danh sách tải lại dữ liệu mới
   const [listVersion, setListVersion] = useState(0)
 
   function openBook(id) {
     setBookId(id)
     setView('detail')
+    window.scrollTo({ top: 0 })
   }
 
   function backToList() {
@@ -40,10 +42,10 @@ export function CatalogPage() {
             </button>
           </div>
         )}
-        <BookList key={listVersion} onSelect={openBook} />
+        <BookList key={listVersion} onSelect={openBook} onRead={onRead} />
       </div>
 
-      {view === 'detail' && <BookDetail bookId={bookId} onBack={backToList} />}
+      {view === 'detail' && <BookDetail bookId={bookId} onBack={backToList} onRead={onRead} onSelect={openBook} />}
     </>
   )
 }

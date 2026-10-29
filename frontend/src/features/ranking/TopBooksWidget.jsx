@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { BookCard } from '../catalog/BookCard'
 import { loadRanking } from './rankingApi'
 
 function MoveBadge({ move }) {
@@ -14,8 +15,9 @@ function MoveBadge({ move }) {
  *  - top: số sách hiển thị (mặc định 5)
  *  - intervalMs: chu kỳ cập nhật (mặc định 10 giây, tạm dừng khi tab bị ẩn)
  *  - currentBookId: sách đang đọc, được làm nổi bật nếu có trong Top
+ *  - onSelect, onRead: mở chi tiết / mở để đọc, giống thẻ ở trang Thịnh hành
  */
-export function TopBooksWidget({ top = 5, intervalMs = 10000, currentBookId = '' }) {
+export function TopBooksWidget({ top = 5, intervalMs = 10000, currentBookId = '', onSelect, onRead }) {
   const [rows, setRows] = useState(null)
   const [error, setError] = useState('')
   const [moves, setMoves] = useState({}) // bookId -> số hạng thay đổi (dương = lên), hoặc 'new'
@@ -83,19 +85,30 @@ export function TopBooksWidget({ top = 5, intervalMs = 10000, currentBookId = ''
           {rows.map((row, index) => {
             const isCurrent = row.bookId === currentBookId
             return (
-              <li key={row.bookId} className={isCurrent ? 'top-item current' : 'top-item'}>
-                <span className="top-rank">{index + 1}</span>
-                <span className="top-info">
-                  <strong>{row.book.title}</strong>
-                  <small>
-                    {row.book.author}
-                    {isCurrent && <span className="top-reading-tag">Đang đọc</span>}
-                  </small>
-                </span>
-                <span className="top-score">
-                  <span>{Number(row.score).toLocaleString('vi-VN')}<small> lượt</small></span>
-                  <MoveBadge move={moves[row.bookId]} />
-                </span>
+              <li key={row.bookId}>
+                <BookCard
+                  horizontal
+                  compact
+                  className={isCurrent ? 'current' : ''}
+                  book={row.book}
+                  onSelect={onSelect}
+                  onRead={onRead}
+                  lead={(
+                    <span className={index < 3 ? `rank-no r${index + 1}` : 'rank-no'} aria-label={`Hạng ${index + 1}`}>
+                      {index + 1}
+                    </span>
+                  )}
+                  meta={(
+                    <span className="rank-meta">
+                      <span className="rank-score">
+                        <span className="icon sm" aria-hidden="true">visibility</span>
+                        {Number(row.score).toLocaleString('vi-VN')}
+                      </span>
+                      <MoveBadge move={moves[row.bookId]} />
+                      {isCurrent && <span className="top-reading-tag">Đang đọc</span>}
+                    </span>
+                  )}
+                />
               </li>
             )
           })}
