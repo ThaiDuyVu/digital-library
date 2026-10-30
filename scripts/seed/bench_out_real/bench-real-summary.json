@@ -1,0 +1,106 @@
+{
+  "environment": {
+    "timestamp": "2026-10-30T03:29:23Z",
+    "dataset": "bản sao dữ liệu thật",
+    "source_mongo_db": "digital_library",
+    "source_redis_db": 0,
+    "python": "3.11.9",
+    "os": "macOS-15.7.4-arm64-arm-64bit",
+    "redis_version": "7.4.10",
+    "mongo_version": "7.0.39",
+    "samples_per_backend": 1000,
+    "warmup_per_backend": 200,
+    "seed": 2026,
+    "positions": 66,
+    "ranking_members": 51,
+    "books_copied": 62,
+    "users_copied": 12,
+    "bench_data_size_mb": 4.83,
+    "concurrency": 1,
+    "redis_appendonly": "yes"
+  },
+  "summary": {
+    "read_progress": {
+      "mongo": {
+        "n": 1000,
+        "mean": 0.25918339700000004,
+        "median": 0.257166,
+        "p95": 0.293916,
+        "p99": 0.371334,
+        "max": 1.249834
+      },
+      "redis": {
+        "n": 1000,
+        "mean": 0.171908527,
+        "median": 0.167708,
+        "p95": 0.204334,
+        "p99": 0.303958,
+        "max": 1.031542
+      }
+    },
+    "write_progress": {
+      "mongo": {
+        "n": 1000,
+        "mean": 0.258643569,
+        "median": 0.260729,
+        "p95": 0.297584,
+        "p99": 0.52825,
+        "max": 1.07325
+      },
+      "redis": {
+        "n": 1000,
+        "mean": 0.17369453999999998,
+        "median": 0.174646,
+        "p95": 0.214792,
+        "p99": 0.283416,
+        "max": 0.846083
+      }
+    },
+    "ranking_incr": {
+      "mongo": {
+        "n": 1000,
+        "mean": 0.27370034800000004,
+        "median": 0.262542,
+        "p95": 0.38425,
+        "p99": 0.664208,
+        "max": 1.629666
+      },
+      "redis": {
+        "n": 1000,
+        "mean": 0.174587876,
+        "median": 0.166854,
+        "p95": 0.231208,
+        "p99": 0.490292,
+        "max": 1.27575
+      }
+    },
+    "ranking_top10": {
+      "redis": {
+        "n": 1000,
+        "mean": 0.29110909199999996,
+        "median": 0.2225205,
+        "p95": 0.667542,
+        "p99": 1.169583,
+        "max": 2.230791
+      },
+      "mongo": {
+        "n": 1000,
+        "mean": 0.474804417,
+        "median": 0.343125,
+        "p95": 1.152625,
+        "p99": 1.92525,
+        "max": 10.440917
+      }
+    },
+    "read_chapter": {
+      "mongo": {
+        "n": 1000,
+        "mean": 0.265376469,
+        "median": 0.261917,
+        "p95": 0.297458,
+        "p99": 0.327166,
+        "max": 0.376209
+      }
+    }
+  }
+}
